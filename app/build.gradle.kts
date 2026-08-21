@@ -51,6 +51,7 @@ dependencies {
     implementation(project(":core:dsp"))
     implementation(project(":core:safety"))
     implementation(project(":core:output"))
+    implementation(project(":core:listen"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

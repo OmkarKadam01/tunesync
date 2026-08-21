@@ -78,16 +78,37 @@ Once HPSS correctly stripped a pure tone to near-zero, envelope normalisation di
 
 ---
 
+### Phase 2: three timing traps, all the same shape
+
+Every one of these is a systematic offset that looks like nothing in a unit test and like sloppiness on a device.
+
+**Microphone input latency.** Treating the newest captured frame as "now" ignores the input buffer — typically 20–80 ms — and makes every cue late by that much. `MicCapture.captureNanosOf` anchors on `AudioRecord.getTimestamp` so the offset is measured, exactly as `TrackPlayer` does for output. Devices that decline to report timestamps fall back to a 40 ms estimate and say so.
+
+**Timebases, again.** `AudioTimestamp.nanoTime` is `CLOCK_MONOTONIC`; the scheduler runs on `CLOCK_BOOTTIME`. Both the playback and the capture path convert rather than compare.
+
+**A backward seek stranded the show.** The runner only ever walked its cue index forward, which is correct when a local file plays start to finish. Against a live source the position can jump — the operator skips, the track restarts, alignment re-seeks — and a backward jump left the index parked past cues that were now in the future, so the rest of the show never fired. The runner now re-indexes via `ArmedShow.indexAt` on any discontinuity over 400 ms.
+
+### Alignment is ambiguous on repetitive material, by nature
+
+On a loop, several offsets a bar apart match equally well, and no matcher can tell them apart — the audio genuinely is the same. `FingerprintTest` pins this down rather than pretending otherwise: any error on a looped fixture must be a whole number of bars. The resolution is temporal continuity, which is why `LiveAligner` constrains its search to a ±2 s window around the predicted position once locked. That constraint is also what makes a twice-a-second re-lock cheap enough to run continuously.
+
+Measured on synthetic fixtures: a correct match scores 342 votes at 0.87 confidence against 2 votes for a foreign track, and a four-minute reference index is ~356 KB.
+
+---
+
 ## Deviations from the PRD
 
 | PRD says | Built as | Why |
 | --- | --- | --- |
 | DSP core in C++17 via the NDK | Plain Kotlin JVM module | The NDK isn't required to hit the target: a four-minute track analyses in ~2 s against an 8 s budget. The module has no Android dependency, so it still gets the host testing the C++ plan was for. Inner loops stay on primitive arrays with no allocation, so the port stays mechanical if a low-end device disagrees. |
 | Beat map `peaks` field carries the waveform | Peaks passed alongside, not serialised | Nothing persists beat maps to disk yet. Revisit when the library screen lands. |
-| Foreground service keeps the show running | `onPause` stops the show | Phase 1 has no foreground service, and leaving a torch strobing in a pocket is worse than stopping. This is M4 work. |
+| Foreground service keeps the show running | Built | `ShowService` declares `mediaPlayback` for rehearsal and `microphone` for listening, because Android 14 requires the type to match what the service actually does. The show now survives backgrounding, with a stop control in the shade. |
+| Beat maps cached by content hash | Not built | One track lives in memory at a time. Phase 2 works against the track you just imported, so a library is not required for it — but it is the next thing worth building. |
 
 ---
 
 ## Not yet verified on hardware
+
+**Phase 2 has never heard a real speaker.** Every fingerprint and drift number here comes from synthetic fixtures fed straight into the matcher — no microphone, no room, no reverb, no crowd. The parts most likely to need adjusting on contact with reality are the lock thresholds (`MIN_VOTES = 12`, `MIN_CONFIDENCE = 0.35`) and the 4-second window length, since real rooms smear transients in ways clean audio does not. `AlignStatus` reports votes, confidence and rate specifically so those can be tuned against measurements rather than guesses.
 
 Every timing number in this repo is host-measured. The **torch actuation latency is a default estimate**, not a measurement — `TorchDriver.measureLatency` times the software call round trip, which is a floor, not the optical truth. Confirming the ±20 ms end-to-end budget needs the photodiode rig described in the PRD: a photodiode over the LED into one scope channel, the audio output into the other, measuring the distribution of light-onset minus audio-beat. A 240 fps phone camera is an acceptable substitute at ~4 ms resolution.

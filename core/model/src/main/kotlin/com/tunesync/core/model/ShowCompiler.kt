@@ -46,9 +46,17 @@ object ShowCompiler {
         val beats = map.effectiveBeats()
         if (beats.isEmpty()) return UnsafeCueList(map.trackId, map.durationMs, emptyList())
 
+        val requested = if (options.subdivision != Subdivision.AUTO) {
+            options.subdivision
+        } else {
+            map.edits.subdivision
+        }
         val step = resolveSubdivision(map, options)
         val threshold = options.sensitivity ?: map.edits.sensitivity ?: style.defaultThreshold()
-        val selected = select(beats, style, step, threshold)
+        val selected = select(
+            beats, style, step, threshold,
+            downbeatsOnly = requested == Subdivision.DOWNBEATS_ONLY,
+        )
 
         val cues = ArrayList<Cue>(selected.size * 2)
         for (beat in selected) {
@@ -91,9 +99,13 @@ object ShowCompiler {
         style: ShowStyle,
         step: Int,
         threshold: Float,
-    ): List<Beat> = when (style) {
-        ShowStyle.ANCHOR -> beats.filter { it.isDownbeat }
-        ShowStyle.KICK -> beats.filter { it.low >= threshold }
+        downbeatsOnly: Boolean,
+    ): List<Beat> = when {
+        // DOWNBEATS_ONLY has step 0, which every stride expression below would
+        // either divide by or silently coerce to 1 — it has to be handled as its
+        // own case rather than as a stride.
+        downbeatsOnly || style == ShowStyle.ANCHOR -> beats.filter { it.isDownbeat }
+        style == ShowStyle.KICK -> beats.filter { it.low >= threshold }
         else -> beats.filterIndexed { i, b -> i % step == 0 && b.salience >= threshold }
     }
 

@@ -20,7 +20,15 @@ enum class AnalysisStage(val label: String) {
 }
 
 sealed interface AnalysisResult {
-    data class Success(val map: BeatMap, val elapsedMs: Long) : AnalysisResult
+    data class Success(
+        val map: BeatMap,
+        val elapsedMs: Long,
+        /**
+         * Reference fingerprint for live alignment, built from the spectrogram
+         * this pass already computed rather than by transforming the track twice.
+         */
+        val fingerprint: FingerprintIndex,
+    ) : AnalysisResult
 
     /** The analyser refusing rather than shipping a grid that looks right and isn't. */
     data class NoBeat(val reason: String, val confidence: Float) : AnalysisResult
@@ -147,7 +155,11 @@ object BeatAnalyzer {
             ),
             beats = beats,
         )
-        return AnalysisResult.Success(map, (System.nanoTime() - started) / 1_000_000)
+        return AnalysisResult.Success(
+            map = map,
+            elapsedMs = (System.nanoTime() - started) / 1_000_000,
+            fingerprint = FingerprintIndex.build(spec),
+        )
     }
 
     /**

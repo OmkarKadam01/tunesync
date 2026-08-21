@@ -93,9 +93,10 @@ class ShowRunner(
         var index = 0
         var torchOffAtNanos = 0L
         var hapticActive = false
+        var lastPos = -1f
 
         try {
-            while (running && index < n) {
+            while (running) {
                 val now = SystemClock.elapsedRealtimeNanos()
 
                 if (torchOffAtNanos != 0L && now >= torchOffAtNanos) {
@@ -114,13 +115,30 @@ class ShowRunner(
                     continue
                 }
 
+                // A live source can jump: the operator skips, the track restarts, or
+                // alignment re-seeks after losing the thread. Walking the index
+                // forward only would leave it stranded past cues that are now in the
+                // future, and the rest of the show would never fire.
+                if (lastPos >= 0f && kotlin.math.abs(pos - lastPos) > SEEK_THRESHOLD_MS) {
+                    index = show.indexAt((pos - LATE_TOLERANCE_MS).toInt())
+                }
+                lastPos = pos
+
                 // Drop anything already past. Late light reads as wrong rather than
                 // late, so it is never worth firing.
                 while (index < n && times[index] < pos - LATE_TOLERANCE_MS) {
                     index++
                     droppedLate++
                 }
-                if (index >= n) break
+
+                if (index >= n) {
+                    // Cues are exhausted but the track usually is not — the last
+                    // beat can sit well before a fade-out. Ending here would report
+                    // the show as over while the music kept playing.
+                    if (pos >= show.durationMs) break
+                    parkBriefly()
+                    continue
+                }
 
                 val waitMs = times[index] - pos
                 if (waitMs > COARSE_SLEEP_THRESHOLD_MS) {
@@ -179,5 +197,12 @@ class ShowRunner(
         /** Past this, the eye reads the flash as wrong rather than delayed. */
         const val LATE_TOLERANCE_MS = 30f
         const val COARSE_SLEEP_THRESHOLD_MS = 2f
+
+        /**
+         * A position change larger than this is a seek, not playback advancing.
+         * Comfortably above the drift filter's own correction range so ordinary
+         * tracking never triggers a re-index.
+         */
+        const val SEEK_THRESHOLD_MS = 400f
     }
 }

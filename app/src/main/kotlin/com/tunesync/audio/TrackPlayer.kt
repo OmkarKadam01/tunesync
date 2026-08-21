@@ -26,10 +26,7 @@ class TrackPlayer(private val signal: AudioSignal) : PositionSource {
     @Volatile
     private var playing = false
 
-    @Volatile
-    private var framesWritten = 0L
-
-    /** Linear fit of (frame position, nanoTime) sampled from getTimestamp(). */
+    /** Anchor of (frame position, nanoTime) sampled from getTimestamp(). */
     @Volatile
     private var anchorFrame = -1L
 
@@ -72,7 +69,6 @@ class TrackPlayer(private val signal: AudioSignal) : PositionSource {
 
         track = t
         anchorFrame = -1
-        framesWritten = 0
         playing = true
         t.play()
 
@@ -125,7 +121,6 @@ class TrackPlayer(private val signal: AudioSignal) : PositionSource {
             val written = t.write(x, offset, count, AudioTrack.WRITE_BLOCKING)
             if (written <= 0) break
             offset += written
-            framesWritten = (offset - startFrame).toLong()
 
             // Re-anchor on the real DAC position a few times a second. Between
             // anchors the position is extrapolated at the nominal sample rate.

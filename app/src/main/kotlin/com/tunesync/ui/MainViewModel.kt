@@ -3,6 +3,7 @@ package com.tunesync.ui
 import android.app.Application
 import android.content.Context
 import android.net.Uri
+import android.os.SystemClock
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.tunesync.audio.AudioDecoder
@@ -12,6 +13,12 @@ import com.tunesync.audio.WaveformPeaks
 import com.tunesync.core.dsp.AnalysisResult
 import com.tunesync.core.dsp.AnalysisStage
 import com.tunesync.core.dsp.BeatAnalyzer
+import com.tunesync.core.dsp.FingerprintIndex
+import com.tunesync.core.listen.AlignStatus
+import com.tunesync.core.listen.LiveAligner
+import com.tunesync.core.listen.MicCapture
+import com.tunesync.service.ShowService
+import com.tunesync.service.ShowSession
 import com.tunesync.core.model.BeatMap
 import com.tunesync.core.model.CompileOptions
 import com.tunesync.core.model.Cue
@@ -25,6 +32,7 @@ import com.tunesync.core.safety.FlashLimiter
 import com.tunesync.core.safety.FlashPolicy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,6 +52,9 @@ data class OutputSettings(
 ) {
     val anyEnabled: Boolean get() = torch || screen
 }
+
+/** Rehearsing against local playback, or following a live source in the room. */
+enum class ShowMode { REHEARSE, LISTEN }
 
 sealed interface UiState {
     data object Empty : UiState
@@ -87,13 +98,32 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private val _needsConsent = MutableStateFlow(true)
     val needsConsent: StateFlow<Boolean> = _needsConsent.asStateFlow()
 
+    /** True playback position, sampled from the audio clock rather than a timer. */
+    private val _positionMs = MutableStateFlow(0f)
+    val positionMs: StateFlow<Float> = _positionMs.asStateFlow()
+
+    /** Set when the device cannot report a real DAC timestamp, so timing is degraded. */
+    private val _degradedClock = MutableStateFlow(false)
+    val degradedClock: StateFlow<Boolean> = _degradedClock.asStateFlow()
+
+    private val _mode = MutableStateFlow(ShowMode.REHEARSE)
+    val mode: StateFlow<ShowMode> = _mode.asStateFlow()
+
+    private val _alignStatus = MutableStateFlow(AlignStatus())
+    val alignStatus: StateFlow<AlignStatus> = _alignStatus.asStateFlow()
+
     private val runner = ShowRunner(torch, haptics) { cue -> _screenCue.value = cue }
     private var player: TrackPlayer? = null
-    private var signal: com.tunesync.core.dsp.AudioSignal? = null
+    private var fingerprint: FingerprintIndex? = null
+    private var aligner: LiveAligner? = null
     private var job: Job? = null
+    private var positionJob: Job? = null
+    private var alignJob: Job? = null
 
     init {
         torch.start()
+        // The notification's stop action has to reach whatever is actually running.
+        ShowSession.register { viewModelScope.launch { stopShow() } }
         runner.onTorchFired = { _torchFlash.value = System.currentTimeMillis() }
         runner.onFinished = {
             _running.value = false
@@ -159,8 +189,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
             when (analysis) {
                 is AnalysisResult.Success -> {
-                    signal = sig
                     player = TrackPlayer(sig)
+                    fingerprint = analysis.fingerprint
                     loadMap(analysis.map, peaks, ShowStyle.PULSE, restoreOutput())
                 }
                 is AnalysisResult.NoBeat ->
@@ -249,6 +279,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             p.start(0)
             runner.start(loaded.show, p)
             _running.value = true
+            ShowService.start(getApplication(), listening = false, title = "TuneSync")
+            startPositionUpdates { p.positionMsAt(it) }
         } catch (e: Exception) {
             // Audio device setup can fail for reasons outside our control — a route
             // change, an exclusive-mode holder, an OEM codec quirk. The show simply
@@ -260,24 +292,104 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    /**
+     * Enter or leave listening mode. Switching stops whatever is running, since
+     * the two modes drive the scheduler from different clocks.
+     */
+    fun setMode(next: ShowMode) {
+        if (_mode.value == next) return
+        stopShow()
+        _mode.value = next
+        _alignStatus.value = AlignStatus()
+    }
+
+    /**
+     * Follow a live source playing this track.
+     *
+     * Nothing is played locally: position comes from the microphone by way of
+     * fingerprint alignment, and the scheduler cannot tell the difference.
+     */
+    fun startListening() {
+        val loaded = _state.value as? UiState.Loaded ?: return
+        val index = fingerprint ?: return
+        _playbackError.value = null
+
+        val live = LiveAligner(index, loaded.map.durationMs)
+        val capture = MicCapture(getApplication())
+        if (!live.start(capture)) {
+            _alignStatus.value = live.status.value
+            _playbackError.value = live.status.value.error ?: "Couldn't start the microphone."
+            return
+        }
+        aligner = live
+
+        alignJob?.cancel()
+        alignJob = viewModelScope.launch {
+            live.status.collect { _alignStatus.value = it }
+        }
+
+        try {
+            runner.start(loaded.show, live)
+            _running.value = true
+            ShowService.start(getApplication(), listening = true, title = "TuneSync")
+            startPositionUpdates { live.positionMsAt(it) }
+        } catch (e: Exception) {
+            live.stop()
+            aligner = null
+            _running.value = false
+            _playbackError.value = "Couldn't start the show."
+        }
+    }
+
+    /**
+     * Drives the playhead from whichever clock is authoritative right now.
+     *
+     * The obvious alternative — incrementing a counter by 16 ms per frame — looks
+     * fine for a few seconds and then visibly separates from the music, because
+     * nothing ties it to where the audio actually is.
+     */
+    private fun startPositionUpdates(source: (Long) -> Float?) {
+        positionJob?.cancel()
+        positionJob = viewModelScope.launch {
+            while (_running.value) {
+                val pos = source(SystemClock.elapsedRealtimeNanos())
+                if (pos != null) _positionMs.value = pos
+                _degradedClock.value = player?.usingFallbackClock == true
+                delay(33)
+            }
+            _positionMs.value = 0f
+        }
+    }
+
     /** Panic stop. Bound to a tap anywhere on the show surface and to volume keys. */
     fun stopShow() {
         runner.stop()
         player?.stop()
+        aligner?.stop()
+        aligner = null
+        alignJob?.cancel()
+        alignJob = null
+        positionJob?.cancel()
+        positionJob = null
         _running.value = false
         _screenCue.value = null
+        _positionMs.value = 0f
+        _alignStatus.value = AlignStatus()
+        ShowService.stop(getApplication())
     }
 
     fun clear() {
         stopShow()
         job?.cancel()
-        signal = null
         player = null
+        fingerprint = null
+        _mode.value = ShowMode.REHEARSE
         _state.value = UiState.Empty
     }
 
     override fun onCleared() {
         stopShow()
+        ShowSession.unregister()
         torch.stop()
         super.onCleared()
     }

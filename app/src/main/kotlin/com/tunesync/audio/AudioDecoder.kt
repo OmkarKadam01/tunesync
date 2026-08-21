@@ -85,11 +85,13 @@ object AudioDecoder {
             val mime = format.getString(MediaFormat.KEY_MIME)!!
 
             // A crypto scheme means DRM. Detect it before MediaCodec throws, so the
-            // user gets an explanation rather than a codec error.
-            if (format.containsKey("crypto-mode") || format.containsKey(MediaFormat.KEY_IS_ADTS).let { false }) {
+            // user gets an explanation rather than a raw codec error.
+            val hasCryptoKey = format.containsKey("crypto-mode") ||
+                format.containsKey("crypto-key") ||
+                format.containsKey("crypto-iv")
+            if (hasCryptoKey || extractor.psshInfo?.isNotEmpty() == true) {
                 return DecodeResult.Protected
             }
-            if (extractor.getPsshInfo()?.isNotEmpty() == true) return DecodeResult.Protected
 
             extractor.selectTrack(trackIndex)
 

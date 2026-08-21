@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -45,6 +46,58 @@ val Cyan = Color(0xFF4FC7E6)
 val TextPrimary = Color(0xFFE7EFF3)
 val TextMuted = Color(0xFF8DA6B4)
 val Warn = Color(0xFFE0A83F)
+val Ok = Color(0xFF59C99A)
+val Risk = Color(0xFFF08A8F)
+
+/** Compact action used inside cards, where a full-width button would shout. */
+@Composable
+fun SmallButton(label: String, primary: Boolean, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (primary) Amber else Ink,
+            contentColor = if (primary) Ink else TextPrimary,
+        ),
+    ) {
+        Text(label, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+    }
+}
+
+/** Two-way switch between rehearsing and listening. */
+@Composable
+fun ModeTabs(listening: Boolean, onSelect: (Boolean) -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(Panel)
+            .padding(3.dp),
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+    ) {
+        ModeTab("Rehearse", !listening, Modifier.weight(1f)) { onSelect(false) }
+        ModeTab("Listen live", listening, Modifier.weight(1f)) { onSelect(true) }
+    }
+}
+
+@Composable
+private fun ModeTab(label: String, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    Box(
+        modifier
+            .clip(RoundedCornerShape(6.dp))
+            .background(if (selected) Amber else Color.Transparent)
+            .clickable(onClick = onClick)
+            .padding(vertical = 10.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            label,
+            color = if (selected) Ink else TextMuted,
+            fontSize = 14.sp,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+        )
+    }
+}
 
 @Composable
 fun EmptyScreen(onPick: () -> Unit) {
