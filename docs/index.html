@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TuneSync docs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,400&display=swap">
+<style>
+:root{ --paper:#E9EEF1; --ink:#0A1A24; --ink-2:#3D5464; --rule:#CBD7DE; --amber:#B25E00; --surface:#fff; }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --paper:#071219; --ink:#E7EFF3; --ink-2:#A7BDC9; --rule:#1E3846; --amber:#F2A63C; --surface:#0C1E29; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Source Serif 4",Georgia,serif;line-height:1.6;
+  display:flex;align-items:center;justify-content:center;min-height:100vh;padding:32px}
+main{max-width:56ch;width:100%}
+h1{font-family:Archivo,sans-serif;font-size:clamp(30px,6vw,44px);line-height:1;
+  letter-spacing:-.03em;margin:0 0 10px}
+p{color:var(--ink-2);margin:0 0 26px}
+ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:1px;
+  border:1px solid var(--rule);border-radius:5px;overflow:hidden}
+li{background:var(--surface)}
+a{display:block;padding:16px 18px;color:var(--ink);text-decoration:none;
+  font-family:Archivo,sans-serif;font-size:15px;font-weight:600}
+a:hover{color:var(--amber)}
+a span{display:block;font-weight:400;font-size:13px;color:var(--ink-2);margin-top:3px}
+a:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+footer{margin-top:22px;font-family:Archivo,sans-serif;font-size:13px;color:var(--ink-2)}
+footer a{display:inline;padding:0;font-weight:400;text-decoration:underline}
+</style>
+</head>
+<body>
+<main>
+  <h1>TuneSync</h1>
+  <p>On-device beat mapping that drives a phone&rsquo;s torch and screen in time with the music.</p>
+  <ul>
+    <li><a href="prd.html">Product requirements<span>Competitive analysis, phase scope, latency budget, edge cases, risks</span></a></li>
+    <li><a href="ENGINEERING-NOTES.md">Engineering notes<span>Measured calibration constants and the bugs worth remembering</span></a></li>
+  </ul>
+  <footer>Source on <a href="https://github.com/OmkarKadam01/tunesync">GitHub</a>.</footer>
+</main>
+</body>
+</html>
