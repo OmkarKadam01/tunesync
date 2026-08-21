@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Waveform bars, tallest in the centre, echoing the beat map. -->
+    <group android:translateX="0" android:translateY="0">
+        <path android:fillColor="#FFA61F" android:pathData="M30,50 h3 v8 h-3 z" />
+        <path android:fillColor="#FFA61F" android:pathData="M36,44 h3 v20 h-3 z" />
+        <path android:fillColor="#FFA61F" android:pathData="M42,36 h3 v36 h-3 z" />
+        <path android:fillColor="#FFFFFF" android:pathData="M48,28 h3 v52 h-3 z" />
+        <path android:fillColor="#FFA61F" android:pathData="M54,34 h3 v40 h-3 z" />
+        <path android:fillColor="#FFA61F" android:pathData="M60,42 h3 v24 h-3 z" />
+        <path android:fillColor="#FFA61F" android:pathData="M66,48 h3 v12 h-3 z" />
+        <path android:fillColor="#FFA61F" android:pathData="M72,52 h3 v4 h-3 z" />
+    </group>
+</vector>

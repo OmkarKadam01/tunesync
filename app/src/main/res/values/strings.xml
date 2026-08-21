@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TuneSync</string>
+
+    <string name="import_cta">Choose a song</string>
+    <string name="import_hint">Pick an audio file you own. Nothing leaves your phone.</string>
+    <string name="empty_title">No song loaded</string>
+
+    <string name="analysing">Analysing</string>
+    <string name="cancel">Cancel</string>
+    <string name="play">Play show</string>
+    <string name="stop">Stop</string>
+
+    <string name="safety_title">Before you start</string>
+    <string name="safety_body">This show flashes your camera light and screen in time with the music. Flashing lights can trigger seizures in people with photosensitive epilepsy.\n\nOutput is capped at 3 flashes per second, the accessibility limit. Tap anywhere during a show to stop it immediately.</string>
+    <string name="safety_continue">I understand, continue</string>
+    <string name="safety_reduced">Use no-flash mode</string>
+
+    <string name="err_drm">This file is copy-protected and can\'t be analysed. Try a file you own outright — MP3, M4A, FLAC or WAV.</string>
+    <string name="err_unsupported">We can\'t read this format. Try MP3, M4A, FLAC, WAV, OGG or Opus.</string>
+    <string name="err_silent">There\'s no audible audio in this file.</string>
+    <string name="err_read">We couldn\'t read that file. It may have been moved or deleted.</string>
+</resources>

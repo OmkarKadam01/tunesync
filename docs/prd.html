@@ -1,0 +1,1592 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>TuneSync</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+:root{
+  --paper:#E9EEF1;
+  --surface:#FFFFFF;
+  --surface-2:#F3F6F8;
+  --ink:#0A1A24;
+  --ink-2:#3D5464;
+  --ink-3:#6C8494;
+  --rule:#CBD7DE;
+  --rule-soft:#DEE7EB;
+  --amber:#B25E00;
+  --amber-mark:#E8890B;
+  --amber-wash:#FBEEDC;
+  --cyan:#0D7590;
+  --cyan-mark:#0D7590;
+  --cyan-wash:#DFEEF3;
+  --risk:#B22B32;
+  --risk-wash:#FAE4E5;
+  --warn:#8F5A00;
+  --warn-wash:#FBEFD9;
+  --ok:#136B49;
+  --ok-wash:#DCEFE6;
+  --arena:#0A1A24;
+  --arena-ink:#EAF1F4;
+  --shadow:0 1px 2px rgba(10,26,36,.06), 0 8px 24px -16px rgba(10,26,36,.28);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#071219;
+    --surface:#0C1E29;
+    --surface-2:#102632;
+    --ink:#E7EFF3;
+    --ink-2:#A7BDC9;
+    --ink-3:#718998;
+    --rule:#1E3846;
+    --rule-soft:#172E3A;
+    --amber:#F2A63C;
+    --amber-mark:#FFA61F;
+    --amber-wash:#2A1D0A;
+    --cyan:#4FC7E6;
+    --cyan-mark:#3FC9E8;
+    --cyan-wash:#08262F;
+    --risk:#F08A8F;
+    --risk-wash:#2C1214;
+    --warn:#E0A83F;
+    --warn-wash:#2A1F09;
+    --ok:#59C99A;
+    --ok-wash:#08251A;
+    --arena:#040C11;
+    --arena-ink:#EAF1F4;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#071219;
+  --surface:#0C1E29;
+  --surface-2:#102632;
+  --ink:#E7EFF3;
+  --ink-2:#A7BDC9;
+  --ink-3:#718998;
+  --rule:#1E3846;
+  --rule-soft:#172E3A;
+  --amber:#F2A63C;
+  --amber-mark:#FFA61F;
+  --amber-wash:#2A1D0A;
+  --cyan:#4FC7E6;
+  --cyan-mark:#3FC9E8;
+  --cyan-wash:#08262F;
+  --risk:#F08A8F;
+  --risk-wash:#2C1214;
+  --warn:#E0A83F;
+  --warn-wash:#2A1F09;
+  --ok:#59C99A;
+  --ok-wash:#08251A;
+  --arena:#040C11;
+  --arena-ink:#EAF1F4;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Source Serif 4",Georgia,"Times New Roman",serif;
+  font-size:17px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4,.ui{font-family:Archivo,"Helvetica Neue",Arial,sans-serif}
+code,kbd,.mono,td.num{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+
+/* ---------- layout ---------- */
+.page{
+  display:grid;
+  grid-template-columns:[full-start] minmax(20px,1fr) [wide-start] minmax(0,940px) [wide-end] minmax(20px,1fr) [full-end];
+}
+.page > *{grid-column:wide}
+.main{grid-column:wide;max-width:none}
+.prose{max-width:68ch}
+.bleed{grid-column:full}
+
+@media (min-width:1180px){
+  .page{
+    grid-template-columns:[full-start] 1fr [rail-start] 240px [rail-end] 44px [wide-start] minmax(0,880px) [wide-end] 1fr [full-end];
+  }
+}
+
+/* ---------- rail ---------- */
+.rail{display:none}
+@media (min-width:1180px){
+  .rail{
+    display:block;grid-column:rail;grid-row:2;
+    position:sticky;top:0;align-self:start;
+    max-height:100vh;overflow-y:auto;
+    padding:44px 0 60px;
+    font-family:Archivo,sans-serif;font-size:12.5px;line-height:1.45;
+  }
+  .rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
+  .rail a{
+    display:grid;grid-template-columns:22px 1fr;gap:8px;
+    padding:5px 10px 5px 0;color:var(--ink-3);text-decoration:none;
+    border-left:2px solid transparent;padding-left:10px;
+  }
+  .rail a:hover{color:var(--ink);border-left-color:var(--rule)}
+  .rail a.on{color:var(--ink);border-left-color:var(--amber-mark);font-weight:600}
+  .rail .n{color:var(--ink-3);font-variant-numeric:tabular-nums;font-weight:500}
+  .rail .grp{
+    margin:18px 0 6px;padding-left:12px;font-size:10.5px;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--ink-3);font-weight:600;
+  }
+  .rail .grp:first-child{margin-top:0}
+}
+
+/* ---------- hero ---------- */
+.hero{grid-column:full;background:var(--arena);color:var(--arena-ink);position:relative;overflow:hidden}
+.hero-in{
+  max-width:1240px;margin:0 auto;padding:52px 24px 40px;
+}
+.eyebrow{
+  font-family:Archivo,sans-serif;font-size:11px;font-weight:600;letter-spacing:.18em;
+  text-transform:uppercase;color:#7FA6B8;margin:0 0 18px;
+}
+.hero h1{
+  font-size:clamp(38px,7vw,72px);line-height:.94;letter-spacing:-.035em;font-weight:700;
+  margin:0 0 18px;text-wrap:balance;
+}
+.hero h1 em{font-style:normal;color:var(--amber-mark)}
+.hero .lede{
+  font-size:clamp(17px,2vw,20px);line-height:1.5;color:#B9CEDA;max-width:60ch;margin:0;
+}
+#wave{display:block;width:100%;height:150px;margin:34px 0 30px}
+.hero-meta{
+  display:flex;flex-wrap:wrap;gap:0;border-top:1px solid rgba(255,255,255,.13);
+}
+.hero-meta div{
+  flex:1 1 150px;padding:16px 20px 4px 0;
+}
+.hero-meta dt{
+  font-family:Archivo,sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:#6F98AC;margin:0 0 5px;
+}
+.hero-meta dd{margin:0;font-family:"JetBrains Mono",monospace;font-size:14px;color:#EAF1F4}
+
+/* ---------- sections ---------- */
+main{padding:56px 0 100px;grid-row:2}
+section{margin:0 0 62px;scroll-margin-top:24px}
+h2{
+  font-size:clamp(25px,3.4vw,34px);line-height:1.1;letter-spacing:-.025em;font-weight:700;
+  margin:0 0 6px;text-wrap:balance;
+  display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:baseline;
+}
+h2 .n{
+  font-family:"JetBrains Mono",monospace;font-size:.5em;font-weight:500;color:var(--amber-mark);
+  font-variant-numeric:tabular-nums;letter-spacing:0;
+}
+.sub{
+  color:var(--ink-2);font-size:16px;margin:0 0 26px;max-width:66ch;
+  padding-bottom:14px;border-bottom:1px solid var(--rule);
+}
+h3{
+  font-size:19px;font-weight:600;letter-spacing:-.012em;margin:34px 0 10px;
+  display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:baseline;
+}
+h3 .n{font-family:"JetBrains Mono",monospace;font-size:.76em;font-weight:500;color:var(--ink-3);font-variant-numeric:tabular-nums}
+h4{font-size:14px;font-weight:600;letter-spacing:.02em;margin:24px 0 8px;color:var(--ink)}
+p{margin:0 0 15px;max-width:68ch}
+ul,ol{margin:0 0 15px;padding-left:22px;max-width:68ch}
+li{margin-bottom:7px}
+li::marker{color:var(--ink-3)}
+a{color:var(--cyan);text-decoration-thickness:1px;text-underline-offset:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--amber-mark);outline-offset:3px;border-radius:2px}
+strong{font-weight:600}
+code{
+  font-size:.85em;background:var(--surface-2);border:1px solid var(--rule-soft);
+  padding:.08em .34em;border-radius:3px;white-space:nowrap;
+}
+
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;margin:0 0 20px;border:1px solid var(--rule);border-radius:5px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:Archivo,sans-serif;font-size:13.5px;line-height:1.45}
+thead th{
+  text-align:left;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-3);padding:11px 14px;border-bottom:1px solid var(--rule);
+  background:var(--surface-2);white-space:nowrap;
+}
+td{padding:11px 14px;border-bottom:1px solid var(--rule-soft);vertical-align:top;color:var(--ink-2)}
+td:first-child{color:var(--ink)}
+tbody tr:last-child td{border-bottom:0}
+td.num,td .mono{font-family:"JetBrains Mono",monospace;font-size:12.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+table code{white-space:nowrap;font-size:12px}
+
+/* ---------- chips ---------- */
+.chip{
+  display:inline-block;font-family:Archivo,sans-serif;font-size:10px;font-weight:600;
+  letter-spacing:.09em;text-transform:uppercase;padding:2.5px 7px;border-radius:3px;
+  vertical-align:1.5px;margin-right:7px;white-space:nowrap;
+}
+.c-block{background:var(--risk-wash);color:var(--risk)}
+.c-deg{background:var(--warn-wash);color:var(--warn)}
+.c-info{background:var(--cyan-wash);color:var(--cyan)}
+.c-ok{background:var(--ok-wash);color:var(--ok)}
+.c-p0{background:var(--amber-wash);color:var(--amber)}
+
+/* ---------- callouts ---------- */
+.note{
+  border-left:3px solid var(--cyan-mark);background:var(--cyan-wash);
+  padding:15px 18px;margin:22px 0;border-radius:0 4px 4px 0;max-width:68ch;
+}
+.note.hot{border-left-color:var(--risk);background:var(--risk-wash)}
+.note.key{border-left-color:var(--amber-mark);background:var(--amber-wash)}
+.note p{margin:0 0 9px}
+.note p:last-child{margin:0}
+.note .lbl{
+  display:block;font-family:Archivo,sans-serif;font-size:10.5px;font-weight:700;
+  letter-spacing:.13em;text-transform:uppercase;margin-bottom:6px;color:var(--ink);
+}
+
+/* ---------- figures ---------- */
+figure{margin:26px 0 24px}
+figure svg{display:block;width:100%;max-width:100%;height:auto;color:var(--ink)}
+.figbox{
+  border:1px solid var(--rule);border-radius:5px;background:var(--surface);
+  padding:22px 20px 16px;overflow-x:auto;
+}
+figcaption{
+  font-family:Archivo,sans-serif;font-size:12.5px;line-height:1.5;color:var(--ink-2);
+  margin-top:13px;max-width:70ch;
+}
+figcaption b{color:var(--ink);font-weight:600}
+
+/* ---------- spec cards ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:5px;overflow:hidden;margin:0 0 22px}
+.cards > div{background:var(--surface);padding:16px 17px}
+.cards dt{font-family:Archivo,sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);margin:0 0 7px}
+.cards dd{margin:0;font-size:14.5px;line-height:1.45;color:var(--ink);font-family:Archivo,sans-serif}
+.cards dd .big{font-family:"JetBrains Mono",monospace;font-size:21px;font-weight:500;letter-spacing:-.02em;display:block;margin-bottom:2px}
+
+/* ---------- req list ---------- */
+.reqs{list-style:none;padding:0;margin:0 0 20px;max-width:none;
+  border:1px solid var(--rule);border-radius:5px;background:var(--surface);overflow:hidden}
+.reqs li{
+  display:grid;grid-template-columns:76px 1fr;gap:16px;margin:0;
+  padding:12px 16px;border-bottom:1px solid var(--rule-soft);
+  font-family:Archivo,sans-serif;font-size:14px;line-height:1.5;color:var(--ink-2);
+}
+.reqs li:last-child{border-bottom:0}
+.reqs .id{
+  font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--amber);
+  font-weight:500;padding-top:1px;
+}
+.reqs b{color:var(--ink);font-weight:600}
+
+/* ---------- fmt block ---------- */
+pre{
+  background:var(--arena);color:#D5E3EA;border-radius:5px;padding:17px 19px;
+  overflow-x:auto;font-family:"JetBrains Mono",monospace;font-size:12.5px;line-height:1.62;
+  margin:0 0 20px;border:1px solid var(--rule);
+}
+pre code{background:none;border:0;padding:0;font-size:inherit;white-space:pre;color:inherit}
+pre .k{color:#7FC4DA}
+pre .v{color:#FFB552}
+pre .c{color:#6C8494}
+
+/* ---------- misc ---------- */
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:24px;margin:0 0 22px}
+.split > div > h4{margin-top:0}
+.split p, .split ul{max-width:none}
+hr{border:0;border-top:1px solid var(--rule);margin:44px 0}
+footer{
+  grid-column:wide;border-top:1px solid var(--rule);padding:26px 0 60px;
+  font-family:Archivo,sans-serif;font-size:12.5px;color:var(--ink-3);
+}
+footer a{color:var(--ink-2)}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important;transition-duration:.001ms !important}
+}
+</style>
+
+<div class="page">
+
+<header class="hero">
+  <div class="hero-in">
+    <p class="eyebrow">Product Requirements &middot; v0.2 &middot; 21 Aug 2026 &middot; M1&ndash;M3 built</p>
+    <h1>Turn a crowd into<br>a <em>lighting rig</em>.</h1>
+    <p class="lede">TuneSync analyses a song on-device, extracts a beat map with the vocals stripped out, and drives the phone's torch, screen and haptics from it &mdash; first against local playback, then against whatever the arena PA is playing.</p>
+    <canvas id="wave" aria-label="Waveform with beat markers landing on the strongest onsets"></canvas>
+    <dl class="hero-meta">
+      <div><dt>Platform</dt><dd>Android 10+ &middot; Kotlin</dd></div>
+      <div><dt>Sync target</dt><dd>&plusmn;20 ms p95</dd></div>
+      <div><dt>Flash ceiling</dt><dd>3.0 Hz hard cap</dd></div>
+      <div><dt>Network</dt><dd>Not required</dd></div>
+    </dl>
+  </div>
+</header>
+
+<nav class="rail" aria-label="Contents">
+  <ol id="toc">
+    <li class="grp">Context</li>
+    <li><a href="#s1"><span class="n">1</span><span>Problem &amp; vision</span></a></li>
+    <li><a href="#s2"><span class="n">2</span><span>What CUE actually does</span></a></li>
+    <li><a href="#s3"><span class="n">3</span><span>Users &amp; segments</span></a></li>
+    <li><a href="#s4"><span class="n">4</span><span>Scope by phase</span></a></li>
+    <li class="grp">Phase 1</li>
+    <li><a href="#s5"><span class="n">5</span><span>Import &amp; decode</span></a></li>
+    <li><a href="#s6"><span class="n">6</span><span>Beat analysis pipeline</span></a></li>
+    <li><a href="#s7"><span class="n">7</span><span>Beat map format</span></a></li>
+    <li><a href="#s8"><span class="n">8</span><span>The visualisation</span></a></li>
+    <li><a href="#s9"><span class="n">9</span><span>Show generation</span></a></li>
+    <li class="grp">Phase 2 &amp; 3</li>
+    <li><a href="#s10"><span class="n">10</span><span>Live sync: fingerprint</span></a></li>
+    <li><a href="#s11"><span class="n">11</span><span>The 3 ms/metre problem</span></a></li>
+    <li><a href="#s12"><span class="n">12</span><span>Ultrasonic venue tier</span></a></li>
+    <li class="grp">Systems</li>
+    <li><a href="#s13"><span class="n">13</span><span>Output &amp; scheduler</span></a></li>
+    <li><a href="#s14"><span class="n">14</span><span>Latency budget</span></a></li>
+    <li><a href="#s15"><span class="n">15</span><span>Safety &amp; compliance</span></a></li>
+    <li><a href="#s16"><span class="n">16</span><span>Architecture</span></a></li>
+    <li><a href="#s17"><span class="n">17</span><span>Permissions &amp; privacy</span></a></li>
+    <li class="grp">Hardening</li>
+    <li><a href="#s18"><span class="n">18</span><span>Edge cases</span></a></li>
+    <li><a href="#s19"><span class="n">19</span><span>Device fragmentation</span></a></li>
+    <li><a href="#s20"><span class="n">20</span><span>Non-functional reqs</span></a></li>
+    <li><a href="#s21"><span class="n">21</span><span>Telemetry</span></a></li>
+    <li><a href="#s22"><span class="n">22</span><span>Test strategy</span></a></li>
+    <li class="grp">Plan</li>
+    <li><a href="#s23"><span class="n">23</span><span>Risks</span></a></li>
+    <li><a href="#s24"><span class="n">24</span><span>Roadmap</span></a></li>
+    <li><a href="#s25"><span class="n">25</span><span>Open questions</span></a></li>
+  </ol>
+</nav>
+
+<main class="main">
+
+<!-- 1 -->
+<section id="s1">
+  <h2><span class="n">01</span><span>Problem &amp; vision</span></h2>
+  <p class="sub">A stadium already contains fifty thousand independently addressable light sources. Nobody is driving them.</p>
+
+  <p>Every phone in an arena has a high-output LED, a bright screen, a haptic motor and a microphone. Collectively they are a lighting rig with more pixels than anything hanging from the truss &mdash; but they sit idle, or worse, they all record video. The three existing ways to light a crowd all have a cost: LED wristbands run <span class="mono">$2&ndash;6</span> a head and end up in landfill, the truss rig only points down at the crowd rather than out from it, and "everyone turn your torch on" produces a static field with no rhythm.</p>
+
+  <p>TuneSync is an Android app that makes each phone an autonomous lighting fixture that knows the song. It does this without a server, without Wi-Fi, and without the venue's cooperation &mdash; the intelligence lives on the handset.</p>
+
+  <h3><span class="n">1.1</span><span>The wedge</span></h3>
+  <p>Phase 1 proves the hard part in a bedroom, not a stadium: <b>import a song from the device, strip the vocals out of the analysis, find the beats, show the user the map, and flash the torch on the strongest hits in perfect time with local playback.</b> If that isn't convincing on a kitchen table it will never be convincing in an arena, and it needs no venue, no contract and no crowd to test.</p>
+
+  <h3><span class="n">1.2</span><span>Success criteria for v1</span></h3>
+  <div class="tw"><table>
+    <thead><tr><th>Dimension</th><th>Target</th><th>How we know</th></tr></thead>
+    <tbody>
+      <tr><td>Beat map accuracy</td><td class="num">F&#8321; &ge; 0.90</td><td>Against hand-annotated ground truth on a 60-track internal set, &plusmn;70 ms tolerance window</td></tr>
+      <tr><td>Analysis speed</td><td class="num">&le; 8 s / 4-min track</td><td>p90 on a Snapdragon 695-class reference device</td></tr>
+      <tr><td>Flash timing error</td><td class="num">&le; 20 ms p95</td><td>Photodiode rig (&sect;22.3), measured photons-out vs. audio-out</td></tr>
+      <tr><td>Perceived sync</td><td class="num">&ge; 4.4 / 5</td><td>"Did the light feel locked to the music?" &mdash; 30 users, 3 genres each</td></tr>
+      <tr><td>Safety</td><td class="num">0 violations</td><td>Automated Harding-style check on every generated show; no build ships with a failure</td></tr>
+      <tr><td>Battery</td><td class="num">&le; 8% / 5 min</td><td>Full show at default intensity, screen on, from 80% charge, 25&deg;C ambient</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 2 -->
+<section id="s2">
+  <h2><span class="n">02</span><span>What CUE actually does</span></h2>
+  <p class="sub">You pointed at CUE as the reference implementation. Their mechanism is not the one you described, and the difference is the whole strategy.</p>
+
+  <p>CUE does <b>not</b> recognise the song. There is no fingerprinting, no ACR, no beat detection on the handset. Instead the production team injects an inaudible carrier into the venue PA alongside the music, and every phone in the building decodes it. From their own published material and SDK documentation:</p>
+
+  <div class="cards">
+    <div><dt>Carrier band</dt><dd><span class="big">17.5&ndash;19.5</span>kHz near-ultrasonic, above most adult hearing but inside every phone mic's range</dd></div>
+    <div><dt>Payload rate</dt><dd><span class="big">~25 bps</span>high-reliability &mdash; enough for a cue index and a frame counter, not a light show</dd></div>
+    <div><dt>Sync accuracy</dt><dd><span class="big">&plusmn;125 ms</span>"to the nearest eighth of a second", their words</dd></div>
+    <div><dt>Proven scale</dt><dd><span class="big">80,000</span>attendees, 150 m propagation, indoor and outdoor</dd></div>
+  </div>
+
+  <p>The show itself is pre-loaded; the audio channel only carries <em>"start now, you are at frame N."</em> They have since moved the client from a native app to a plain web page reached by QR code, using the browser's camera-torch API &mdash; which removed the install step entirely. Production integration goes further than audio: they expose UDP triggers so the crowd show can be cued from the same desk that runs the video wall and house lights.</p>
+
+  <div class="note key">
+    <span class="lbl">The strategic read</span>
+    <p>CUE's moat is <b>venue relationships and a box in the PA rack</b>, not signal processing. Their approach is more reliable than anything we can do from the audience side &mdash; and completely unavailable to an artist who hasn't signed a deal with them, or to a fan who just wants their phone to do something at a gig.</p>
+    <p>Fingerprint alignment is the thing they structurally cannot offer: it works <em>uninvited</em>. That is our wedge. We then add an ultrasonic tier for the venues that do sign, because for a 50,000-seat show it is simply the better mechanism and we should not pretend otherwise.</p>
+  </div>
+
+  <p>Two lessons we should copy outright. First, <b>the show data must be on the device before the moment</b> &mdash; whatever the sync channel, it carries a clock, never a light show. Second, <b>the install step is the biggest funnel loss in the entire product</b>. Asking a fan in row 300 to find, download and open a 40 MB APK during a 90-second stadium moment will convert in the low single digits. See &sect;23 for how we plan around that.</p>
+</section>
+
+<!-- 3 -->
+<section id="s3">
+  <h2><span class="n">03</span><span>Users &amp; segments</span></h2>
+  <p class="sub">Three people touch this product and they want different things from it.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th style="width:20%">Who</th><th style="width:34%">What they need</th><th>What breaks the experience for them</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>The fan</b><br><span style="font-size:12.5px;color:var(--ink-3)">Row 300, one hand on a beer</span></td>
+        <td>To join in under ten seconds, one-handed, with no account, and have it obviously work. Wants to feel part of the room, not operate software.</td>
+        <td>Any signup. A permission dialog they don't understand. A dark screen with no feedback while it "listens". Missing the moment because the app was still analysing.</td>
+      </tr>
+      <tr>
+        <td><b>The show designer</b><br><span style="font-size:12.5px;color:var(--ink-3)">Tour LD or team's game-ops lead</span></td>
+        <td>To load the set's tracks, check the auto-map, nudge what's wrong, and set intensity per section. Wants to trust it before 20,000 people see it.</td>
+        <td>A beat map they can't correct. No way to rehearse. No confidence readout. Anything that could fire unexpectedly during a quiet moment.</td>
+      </tr>
+      <tr>
+        <td><b>The operator</b><br><span style="font-size:12.5px;color:var(--ink-3)">In the booth on the night</span></td>
+        <td>A big go button, a visible state of the room, and a bigger stop button. Integration with the desk they already run.</td>
+        <td>Not knowing how many phones are actually locked. No kill switch. Any dependence on venue Wi-Fi, which is always saturated.</td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <p>Phase 1 serves the show designer almost exclusively &mdash; it is a workbench. The fan-facing product only becomes real in Phase 2, and the operator only exists in Phase 3.</p>
+</section>
+
+<!-- 4 -->
+<section id="s4">
+  <h2><span class="n">04</span><span>Scope by phase</span></h2>
+  <p class="sub">Each phase is independently shippable and independently useful.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th style="width:13%">Phase</th><th style="width:26%">Ships</th><th style="width:30%">In scope</th><th>Explicitly out</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="chip c-p0">P1</span><b>Workbench</b></td>
+        <td>Import a local song, map it, see it, run the show against local playback</td>
+        <td>SAF import, decode, HPSS + onset + tempo + downbeat, beat-map editor, waveform view, torch/screen/haptic output, rehearsal transport, safety limiter</td>
+        <td>Any microphone use, any networking, any account, multi-device, live audio</td>
+      </tr>
+      <tr>
+        <td><span class="chip c-info">P2</span><b>Listen</b></td>
+        <td>Point the phone at a PA playing a track you've already mapped; it locks on and runs the show</td>
+        <td>Landmark fingerprinting at import, rolling mic match, drift filter, confidence UI, propagation-delay compensation, graceful loss-of-lock</td>
+        <td>Identifying <em>unknown</em> songs, cloud fingerprint database, live-performance matching (studio cut only)</td>
+      </tr>
+      <tr>
+        <td><span class="chip c-info">P3</span><b>Venue</b></td>
+        <td>Pro tier: a transmitter in the PA rack, guaranteed lock, operator console</td>
+        <td>Ultrasonic encoder + decoder, show packaging &amp; distribution, operator console, UDP/OSC trigger in, fleet telemetry</td>
+        <td>Web/no-install client (evaluated separately &mdash; see &sect;23.1)</td>
+      </tr>
+    </tbody>
+  </table></div>
+
+  <h3><span class="n">4.1</span><span>Permanent non-goals</span></h3>
+  <ul>
+    <li><b>Playing DRM-protected streams.</b> Spotify, Apple Music and YouTube Music files are not readable by third-party apps and never will be. We import files the user owns.</li>
+    <li><b>Identifying a song we have never seen.</b> That is an ACR service and a licensing relationship. We match against tracks the user has already imported.</li>
+    <li><b>Being a music player.</b> Phase 1 playback exists to rehearse the show, not to replace the user's player.</li>
+    <li><b>Exceeding the flash safety ceiling for artistic reasons.</b> Not negotiable at any tier. See &sect;15.</li>
+  </ul>
+</section>
+
+<hr>
+
+<!-- 5 -->
+<section id="s5">
+  <h2><span class="n">05</span><span>Import &amp; decode</span></h2>
+  <p class="sub">Getting audio into the app without asking for a permission we don't need.</p>
+
+  <h3><span class="n">5.1</span><span>Use the document picker, not the media permission</span></h3>
+  <p>The obvious route is <code>READ_MEDIA_AUDIO</code> plus a MediaStore query. Don't. <code>ACTION_OPEN_DOCUMENT</code> through the Storage Access Framework returns a persistable URI, reaches files MediaStore never indexed (Downloads, SD card, Drive), and <b>requires no runtime permission at all</b>. One fewer scary dialog on first run is worth more than a prettier in-app browser.</p>
+  <p>Take a persistable read grant immediately (<code>takePersistableUriPermission</code>) so the track survives a reboot, and copy the decoded analysis artefacts into app-private storage so a deleted or moved source file doesn't destroy the show.</p>
+
+  <ul class="reqs">
+    <li><span class="id">IMP-01</span><div><b>Import via SAF.</b> Single and multi-select. Accept <code>audio/*</code> plus explicit MIME hints for MP3, AAC/M4A, FLAC, WAV, OGG/Vorbis, Opus.</div></li>
+    <li><span class="id">IMP-02</span><div><b>Persist the grant.</b> Store the URI with a persistable read permission; re-verify on app start and surface a re-link prompt if revoked.</div></li>
+    <li><span class="id">IMP-03</span><div><b>Copy, don't reference.</b> Analysis output, waveform peaks and fingerprints are written to app-private storage keyed by a content hash of the source, so the beat map outlives the file.</div></li>
+    <li><span class="id">IMP-04</span><div><b>Deduplicate by content.</b> SHA-256 of the first and last 1 MB plus file length. Re-importing the same track reuses the existing map instead of re-analysing.</div></li>
+    <li><span class="id">IMP-05</span><div><b>Read tags for display only.</b> Title, artist, artwork via <code>MediaMetadataRetriever</code>. Never trust tag duration &mdash; measure it from the decoder.</div></li>
+  </ul>
+
+  <h3><span class="n">5.2</span><span>Decode to analysis PCM</span></h3>
+  <p><code>MediaExtractor</code> &rarr; <code>MediaCodec</code> in asynchronous mode &rarr; 16-bit PCM. Then, for the analysis path only: downmix to mono by channel average, and resample to <b>22,050 Hz</b>. Beat tracking gains nothing above ~11 kHz of content and the halved sample rate roughly halves every FFT downstream. Playback uses the original file untouched.</p>
+
+  <div class="note key">
+    <span class="lbl">Found in build &mdash; the chain has its own group delay</span>
+    <p>Two systematic timing errors live in the analysis chain itself, and together they put every beat <b>57 ms early</b> before either was fixed &mdash; most of the accuracy budget, spent on nothing.</p>
+    <p>First, STFT frames must be <b>centred</b>: timestamping a frame from its window start reports each onset half a window (46 ms) early. Second, spectral flux is a backward difference, so it peaks while magnitude is still rising, before the transient reaches the window centre. What remains is a fixed group delay measured at <b>0.60 hops</b> using isolated impulses &mdash; not fitted to music, so it cannot encode a quirk of the fixtures. With both corrected, mean absolute beat error on clean material is <b>6&ndash;8 ms</b>. <code>ChainLatencyTest</code> fails if a change to the window, hop or flux definition moves it.</p>
+  </div>
+
+  <div class="note">
+    <span class="lbl">Detail that will bite you</span>
+    <p>MP3 and AAC decoders emit encoder delay and padding. If you ignore it, every beat map is offset by 20&ndash;70 ms against the file &mdash; consistently wrong, and consistently blamed on the beat tracker. Read <code>MediaFormat.KEY_ENCODER_DELAY</code> and <code>KEY_ENCODER_PADDING</code> where present and trim the decoded stream before analysis. Where absent (older devices, some containers), fall back to the format's nominal delay and expose the global offset nudge in the editor (&sect;8.3).</p>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="s6">
+  <h2><span class="n">06</span><span>Beat analysis pipeline</span></h2>
+  <p class="sub">Six stages, all on-device, no model file, no network. "Ignoring the vocals" falls out of the second stage for free.</p>
+
+  <p>You framed this as "ignore vocals and map the beats." The clean way to get there is not vocal removal &mdash; it is <b>harmonic&ndash;percussive source separation</b>. Vocals, guitars, pads and bass are harmonic: they hold pitch, so they draw horizontal lines across a spectrogram. Drums are percussive: broadband transients, so they draw vertical lines. Median-filtering the magnitude spectrogram along each axis pulls the two apart, and the percussive residue is exactly the signal a beat tracker wants. It costs no model file, no download and a couple of seconds of CPU &mdash; where shipping a Demucs or Spleeter model would cost 30&ndash;80 MB of APK and up to three minutes of thermally-expensive inference per track for a map that is barely better.</p>
+
+  <figure>
+    <div class="figbox">
+      <svg viewBox="0 0 900 250" role="img" aria-label="Analysis pipeline: decoded PCM is resampled, split by STFT into harmonic and percussive spectrograms; only the percussive path continues through spectral flux, tempo estimation and dynamic-programming beat tracking to produce the beat map, while the harmonic path containing vocals is discarded.">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+          </marker>
+          <marker id="ar-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#E8890B"/>
+          </marker>
+          <marker id="ar-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="currentColor" opacity=".38"/>
+          </marker>
+        </defs>
+        <g font-family="Archivo, sans-serif" font-size="11.5" fill="currentColor">
+
+          <!-- row 1: decode -->
+          <rect x="8" y="96" width="104" height="46" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <text x="60" y="115" text-anchor="middle" font-weight="600">PCM decode</text>
+          <text x="60" y="130" text-anchor="middle" font-size="10" opacity=".6">MediaCodec</text>
+
+          <line x1="112" y1="119" x2="146" y2="119" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/>
+          <text x="129" y="110" text-anchor="middle" font-size="9.5" opacity=".65">mono</text>
+          <text x="129" y="136" text-anchor="middle" font-size="9.5" opacity=".65">22 kHz</text>
+
+          <rect x="148" y="96" width="94" height="46" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <text x="195" y="115" text-anchor="middle" font-weight="600">STFT</text>
+          <text x="195" y="130" text-anchor="middle" font-size="10" opacity=".6">2048 / 512</text>
+
+          <!-- split -->
+          <path d="M242 119 L266 119 L266 52 L296 52" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".38" marker-end="url(#ar-d)"/>
+          <path d="M242 119 L266 119 L266 186 L296 186" fill="none" stroke="#E8890B" stroke-width="1.4" marker-end="url(#ar-a)"/>
+          <text x="272" y="83" font-size="9.5" opacity=".55">horizontal median</text>
+          <text x="272" y="172" font-size="9.5" fill="#E8890B">vertical median</text>
+
+          <!-- discarded harmonic -->
+          <rect x="298" y="30" width="150" height="44" rx="4" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 3" opacity=".45"/>
+          <text x="373" y="49" text-anchor="middle" opacity=".55" font-weight="600">Harmonic</text>
+          <text x="373" y="63" text-anchor="middle" font-size="10" opacity=".45">vocals, bass, pads</text>
+          <line x1="448" y1="52" x2="486" y2="52" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 3" opacity=".38"/>
+          <text x="494" y="56" font-size="10.5" opacity=".5">discarded</text>
+
+          <!-- percussive chain -->
+          <rect x="298" y="164" width="112" height="44" rx="4" fill="none" stroke="#E8890B" stroke-width="1.4"/>
+          <text x="354" y="183" text-anchor="middle" font-weight="600" fill="#E8890B">Percussive</text>
+          <text x="354" y="197" text-anchor="middle" font-size="10" fill="#E8890B" opacity=".8">kick, snare, hat</text>
+
+          <line x1="410" y1="186" x2="444" y2="186" stroke="#E8890B" stroke-width="1.4" marker-end="url(#ar-a)"/>
+          <rect x="446" y="164" width="112" height="44" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <text x="502" y="183" text-anchor="middle" font-weight="600">Spectral flux</text>
+          <text x="502" y="197" text-anchor="middle" font-size="10" opacity=".6">onset envelope</text>
+
+          <line x1="558" y1="186" x2="592" y2="186" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/>
+          <rect x="594" y="164" width="112" height="44" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <text x="650" y="183" text-anchor="middle" font-weight="600">Beat track</text>
+          <text x="650" y="197" text-anchor="middle" font-size="10" opacity=".6">tempo + DP</text>
+
+          <!-- tempo feedback -->
+          <path d="M502 164 L502 132 L650 132 L650 162" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".5" marker-end="url(#ar-d)"/>
+          <text x="576" y="126" text-anchor="middle" font-size="9.5" opacity=".6">tempogram &rarr; BPM prior</text>
+
+          <line x1="706" y1="186" x2="740" y2="186" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar)"/>
+          <rect x="742" y="152" width="150" height="68" rx="4" fill="#E8890B" fill-opacity=".1" stroke="#E8890B" stroke-width="1.4"/>
+          <text x="817" y="176" text-anchor="middle" font-weight="700" fill="#E8890B">Beat map</text>
+          <text x="817" y="192" text-anchor="middle" font-size="10" fill="#E8890B" opacity=".85">beats · downbeats</text>
+          <text x="817" y="206" text-anchor="middle" font-size="10" fill="#E8890B" opacity=".85">salience · sections</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption><b>Only the percussive half of the spectrogram reaches the beat tracker.</b> The harmonic half &mdash; which is where the vocal lives &mdash; is computed and thrown away. The tempo estimate feeds back as a prior on the beat tracker rather than being applied as a hard grid, so tempo drift in live or hand-played recordings is tracked rather than fought.</figcaption>
+  </figure>
+
+  <h3><span class="n">6.1</span><span>Stage parameters</span></h3>
+  <div class="tw"><table>
+    <thead><tr><th style="width:15%">Stage</th><th style="width:32%">Method</th><th>Parameters and notes</th></tr></thead>
+    <tbody>
+      <tr><td><b>STFT</b></td><td>Hann window, magnitude spectrogram</td><td><span class="mono">n_fft 2048</span>, <span class="mono">hop 512</span> &rarr; 23.2 ms frames, 43 fps at 22,050 Hz. Fine enough to place a beat inside our &plusmn;20 ms budget after parabolic peak interpolation.</td></tr>
+      <tr><td><b>HPSS</b></td><td>Median filtering, soft (Wiener) mask</td><td>Horizontal kernel ~0.2 s (17 frames) for harmonic; vertical kernel ~500 Hz (23 bins) for percussive. Soft mask with power 2 rather than a binary mask &mdash; binary masking produces artefacts that read as spurious onsets.</td></tr>
+      <tr><td><b>Onset</b></td><td>Half-wave rectified log-magnitude flux</td><td>Computed on the percussive spectrogram, in <b>three bands</b>: low &lt;200 Hz (kick), mid 200&ndash;2k (snare/clap), high &gt;2k (hats). Keeping them separate is what later lets a show say "flash on kicks only".</td></tr>
+      <tr><td><b>Tempo</b></td><td>Autocorrelation of the onset envelope</td><td>Log-normal prior centred at 120 BPM, &sigma; = 1.0 octave. Without the prior, half-time and double-time errors are the single most common failure &mdash; a 140 BPM track reported as 70 produces a show that flashes on every other beat and looks broken.</td></tr>
+      <tr><td><b>Beats</b></td><td>Ellis dynamic-programming beat tracker</td><td>Maximises cumulative onset strength subject to a tempo-consistency penalty. Global optimum over the whole track, so a weak bridge doesn't derail the grid.</td></tr>
+      <tr><td><b>Downbeats</b></td><td>Low-band periodicity + metre prior</td><td>Test 3/4 and 4/4 hypotheses over bar-length windows of low-band energy. Emit a confidence; below 0.6 the show falls back to beat-level cues and the editor flags the track.</td></tr>
+      <tr><td><b>Sections</b></td><td>Self-similarity novelty curve</td><td>MFCC + RMS self-similarity matrix, checkerboard kernel. Gives verse/chorus/drop boundaries so intensity can rise into a chorus. <span class="chip c-info" style="margin-left:4px">P1.5</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3><span class="n">6.2</span><span>Salience &mdash; the "highest nodes"</span></h3>
+  <p>You described flashing on the peaks of the graph. That needs a defined number per beat, not an eyeball. Every beat <span class="mono">b</span> gets a <b>salience</b> in <span class="mono">[0,1]</span>:</p>
+  <pre><code><span class="c">// per beat, all terms normalised to the track's own distribution</span>
+salience(b) = 0.45 · flux_low(b)      <span class="c">// kick weight — the thing you feel</span>
+            + 0.25 · flux_total(b)    <span class="c">// overall transient energy</span>
+            + 0.20 · metric(b)        <span class="c">// 1.0 downbeat, 0.6 backbeat, 0.3 other</span>
+            + 0.10 · rms_local(b)     <span class="c">// section loudness, 2-bar window</span></code></pre>
+  <p>Show generation then thresholds on salience rather than firing on every beat, which is both the aesthetic win and, at high tempo, the safety mechanism (&sect;15.2). The weights are tunable per show style and exposed in the editor as a single "sensitivity" slider that moves the threshold, not the weights.</p>
+
+  <h3><span class="n">6.3</span><span>Confidence, and admitting failure</span></h3>
+  <p>The analyser must return a per-track confidence and be willing to say it failed. Rubato piano, free-time intros, ambient, spoken word and heavily swung jazz will not produce a usable grid, and a bad grid that pretends to be good is worse than an honest refusal. Confidence combines beat-interval variance, onset-envelope periodicity strength and the margin between the top two tempo hypotheses. Below <span class="mono">0.5</span> the app says so plainly and offers manual tap-tempo instead of shipping a broken map.</p>
+</section>
+
+<!-- 7 -->
+<section id="s7">
+  <h2><span class="n">07</span><span>Beat map format</span></h2>
+  <p class="sub">One artefact, versioned, portable, and the contract between every subsystem downstream.</p>
+
+  <p>The beat map is the only thing Phase 1 produces and the only thing Phases 2 and 3 consume. Get the format right now. JSON is the interchange and debug form; the runtime loads a Protobuf encoding of the identical schema for parse speed and size.</p>
+
+  <pre><code>{
+  <span class="k">"schema"</span>: <span class="v">2</span>,
+  <span class="k">"trackId"</span>: <span class="v">"sha256:9f2c…"</span>,          <span class="c">// content hash, not filename</span>
+  <span class="k">"durationMs"</span>: <span class="v">243180</span>,
+  <span class="k">"sampleRate"</span>: <span class="v">44100</span>,              <span class="c">// of the SOURCE, for offset math</span>
+  <span class="k">"analysis"</span>: {
+    <span class="k">"engineVersion"</span>: <span class="v">"1.4.0"</span>,        <span class="c">// re-analyse when this changes</span>
+    <span class="k">"confidence"</span>: <span class="v">0.87</span>,
+    <span class="k">"tempoBpm"</span>: <span class="v">128.02</span>,
+    <span class="k">"tempoStable"</span>: <span class="v">true</span>,
+    <span class="k">"meter"</span>: <span class="v">[4, 4]</span>,
+    <span class="k">"meterConfidence"</span>: <span class="v">0.91</span>,
+    <span class="k">"encoderDelayMs"</span>: <span class="v">26.1</span>            <span class="c">// already applied; recorded for audit</span>
+  },
+  <span class="k">"beats"</span>: [                            <span class="c">// ~500 for a 4-min track</span>
+    { <span class="k">"tMs"</span>: <span class="v">1874</span>, <span class="k">"idx"</span>: <span class="v">0</span>, <span class="k">"bar"</span>: <span class="v">1</span>, <span class="k">"pos"</span>: <span class="v">1</span>,
+      <span class="k">"salience"</span>: <span class="v">0.92</span>, <span class="k">"bands"</span>: [<span class="v">0.95</span>, <span class="v">0.41</span>, <span class="v">0.22</span>] },
+    …
+  ],
+  <span class="k">"sections"</span>: [
+    { <span class="k">"startMs"</span>: <span class="v">0</span>, <span class="k">"label"</span>: <span class="v">"intro"</span>, <span class="k">"energy"</span>: <span class="v">0.31</span> },
+    { <span class="k">"startMs"</span>: <span class="v">30020</span>, <span class="k">"label"</span>: <span class="v">"chorus"</span>, <span class="k">"energy"</span>: <span class="v">0.88</span> }
+  ],
+  <span class="k">"peaks"</span>: <span class="v">"…base64 u8[2048]…"</span>,        <span class="c">// waveform for the editor, precomputed</span>
+  <span class="k">"edits"</span>: {                            <span class="c">// user overrides, never overwritten by re-analysis</span>
+    <span class="k">"globalOffsetMs"</span>: <span class="v">-12</span>,
+    <span class="k">"muted"</span>: [<span class="v">143</span>, <span class="v">144</span>],
+    <span class="k">"added"</span>: [{ <span class="k">"tMs"</span>: <span class="v">98450</span>, <span class="k">"salience"</span>: <span class="v">1.0</span> }]
+  }
+}</code></pre>
+
+  <ul class="reqs">
+    <li><span class="id">FMT-01</span><div><b>Edits are a separate layer.</b> Re-running analysis with a newer engine must preserve user edits. Store them as a diff against beat indices <em>and</em> timestamps so they can be re-anchored if indices shift.</div></li>
+    <li><span class="id">FMT-02</span><div><b>Version the engine, not just the schema.</b> A map produced by engine 1.3 is silently re-analysed in the background when 1.4 ships; the user is told only if the result differs materially.</div></li>
+    <li><span class="id">FMT-03</span><div><b>Portable by design.</b> No Android types, no absolute paths, no device-specific fields. A map produced on a Pixel must run unmodified on an iPhone in a later port and on the operator console.</div></li>
+    <li><span class="id">FMT-04</span><div><b>Bounded size.</b> Target &lt; 80 KB JSON / &lt; 25 KB Protobuf per track so a 30-track set list fits in a single distributable bundle.</div></li>
+  </ul>
+</section>
+
+<!-- 8 -->
+<section id="s8">
+  <h2><span class="n">08</span><span>The visualisation</span></h2>
+  <p class="sub">The screen you sketched: waveform, beats on top, and the flash train underneath so the mapping is visible rather than asserted.</p>
+
+  <p>This screen is the product in Phase 1. It is where the user decides whether to trust the analysis, and it must show three synchronised lanes over the same timebase:</p>
+
+  <ol>
+    <li><b>Waveform.</b> The symmetric peak-bar rendering from your reference &mdash; min/max envelope per column, drawn from the precomputed <span class="mono">peaks</span> array so scrolling never touches the audio file.</li>
+    <li><b>Beat lane.</b> A tick per beat, height proportional to salience, downbeats taller and accented. This is the "graph" &mdash; it makes an unstable grid visible at a glance, because wobble in the tick spacing is far easier to see than to hear.</li>
+    <li><b>Cue lane.</b> What will actually happen: torch pulses as filled blocks with real width (the pulse duration), screen colour as a tinted band, haptics as small marks. Above-threshold beats show a cue; below-threshold beats show only a faint tick, so the effect of the sensitivity slider is immediately legible.</li>
+  </ol>
+
+  <h3><span class="n">8.1</span><span>Rendering requirements</span></h3>
+  <ul class="reqs">
+    <li><span class="id">VIS-01</span><div><b>60 fps while scrubbing</b> on a mid-range device for a 10-minute track. Draw on a <code>Canvas</code> in a Compose <code>drawWithCache</code>, not with composables per beat.</div></li>
+    <li><span class="id">VIS-02</span><div><b>Pinch to zoom</b> from whole-track to one-bar. At bar zoom, show the millisecond grid so a user can nudge a beat precisely.</div></li>
+    <li><span class="id">VIS-03</span><div><b>The playhead is driven by <code>AudioTrack.getTimestamp()</code></b>, not by a timer. See &sect;13.4 &mdash; this is the difference between a playhead that looks right and one that looks right.</div></li>
+    <li><span class="id">VIS-04</span><div><b>Live torch mirror.</b> A dot in the corner lights when the torch fires, so the user can verify sync while looking at the screen rather than at the back of the phone.</div></li>
+    <li><span class="id">VIS-05</span><div><b>Colour-blind safe.</b> Beat and cue lanes must be distinguishable by shape and position, not hue alone.</div></li>
+  </ul>
+
+  <h3><span class="n">8.2</span><span>Progressive disclosure during analysis</span></h3>
+  <p>Analysis takes seconds, and a spinner for eight seconds feels broken. Stream the stages: the waveform can be drawn as soon as decode passes each chunk, the tempo estimate lands about halfway, and beats fill in from the front. The user watches the map build. This also means the <em>cancel</em> button has something meaningful to cancel.</p>
+
+  <h3><span class="n">8.3</span><span>The editor</span></h3>
+  <div class="tw"><table>
+    <thead><tr><th style="width:26%">Control</th><th>Behaviour</th></tr></thead>
+    <tbody>
+      <tr><td><b>Global offset</b></td><td>&plusmn;250 ms slider with 1 ms keyboard steps. Catches decoder-delay residue and per-device torch latency the calibration missed. Persisted per track.</td></tr>
+      <tr><td><b>Tap tempo</b></td><td>Full manual override for tracks the analyser refused. Tap eight beats, the app fits a grid, the user drags the phase. Produces a valid map with <span class="mono">confidence: manual</span>.</td></tr>
+      <tr><td><b>Half / double time</b></td><td>One tap. The single most common correction, so it gets a dedicated button rather than living in a menu.</td></tr>
+      <tr><td><b>Mute / add beat</b></td><td>Tap a tick to silence it, long-press empty timeline to insert one. Writes to <span class="mono">edits</span>, never to <span class="mono">beats</span>.</td></tr>
+      <tr><td><b>Subdivision</b></td><td>Fire on every beat / every 2nd / every 4th / downbeats only. Auto-selected by the safety limiter at high tempo and shown as already-set with a reason.</td></tr>
+      <tr><td><b>Sensitivity</b></td><td>Moves the salience threshold. The cue lane updates live so the user sees the density change before committing.</td></tr>
+      <tr><td><b>Section intensity</b></td><td>Per-section multiplier on brightness and cue density &mdash; quiet verse, full chorus.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 9 -->
+<section id="s9">
+  <h2><span class="n">09</span><span>Show generation</span></h2>
+  <p class="sub">Turning a beat map into a timeline of hardware events, with the safety limiter as the last gate before anything can fire.</p>
+
+  <p>A <b>show</b> is a beat map plus a style, compiled into a flat, sorted list of cues. Compilation happens once, ahead of time. The runtime never makes a creative decision at 3 ms notice &mdash; it only executes a pre-sorted list, which is what makes the timing budget in &sect;14 achievable.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th style="width:19%">Channel</th><th style="width:30%">Cue payload</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><b>Torch</b></td><td><span class="mono">{tMs, durMs, strength}</span></td><td>Duration 40&ndash;120 ms typical. <span class="mono">strength</span> maps to <code>turnOnTorchWithStrengthLevel</code> on Android 13+, ignored below (binary on/off).</td></tr>
+      <tr><td><b>Screen</b></td><td><span class="mono">{tMs, durMs, rgb, curve}</span></td><td>Curve is <span class="mono">step</span>, <span class="mono">decay</span> or <span class="mono">ramp</span>. Rendered at display refresh, so it can be smooth where the torch cannot.</td></tr>
+      <tr><td><b>Haptic</b></td><td><span class="mono">{tMs, amplitude}</span></td><td><code>VibrationEffect.createOneShot</code>, or a composition primitive on devices that expose one. Off by default.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3><span class="n">9.1</span><span>Built-in styles</span></h3>
+  <div class="tw"><table>
+    <thead><tr><th style="width:20%">Style</th><th style="width:34%">Rule</th><th>Fits</th></tr></thead>
+    <tbody>
+      <tr><td><b>Pulse</b> <span class="chip c-ok">default</span></td><td>Torch on every beat with salience &gt; 0.55; 60 ms; strength scaled by salience</td><td>Almost everything. The safe default.</td></tr>
+      <tr><td><b>Anchor</b></td><td>Downbeats only, 100 ms, full strength, screen holds a colour across the bar</td><td>Slow songs, anthems, high-tempo tracks where every beat would breach the flash cap</td></tr>
+      <tr><td><b>Kick</b></td><td>Fires on low-band flux above threshold, ignoring the beat grid entirely</td><td>Electronic and hip-hop, where the kick pattern is the hook and isn't always on the beat</td></tr>
+      <tr><td><b>Swell</b></td><td>No torch. Screen brightness follows the smoothed onset envelope</td><td>Ballads, the reduced-flash accessibility mode, and any user who opts out of strobing</td></tr>
+      <tr><td><b>Sections</b></td><td>Screen colour changes per section, torch density scales with section energy</td><td>Full-song shows where a single look for four minutes gets boring</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3><span class="n">9.2</span><span>The compile step</span></h3>
+  <ol>
+    <li>Select beats by style rule and salience threshold.</li>
+    <li>Apply <span class="mono">edits</span> — mutes removed, additions merged, global offset applied.</li>
+    <li>Apply per-section intensity multipliers.</li>
+    <li>Subtract the device's measured torch latency (&sect;13.1) so scheduled time means <em>photons out</em>, not <em>call made</em>.</li>
+    <li><b>Run the safety limiter (&sect;15.2).</b> Non-optional, non-bypassable, and it may delete cues.</li>
+    <li>Merge overlapping cues, sort by time, freeze to an immutable array.</li>
+  </ol>
+  <p>Compilation is deterministic: same map, same style, same device profile &rarr; byte-identical cue list. That property is what makes the show testable.</p>
+</section>
+
+<hr>
+
+<!-- 10 -->
+<section id="s10">
+  <h2><span class="n">10</span><span>Live sync &mdash; fingerprint alignment</span></h2>
+  <p class="sub">Phase 2's consumer path. The phone hears the PA, works out where in the song it is, and runs a show it already has.</p>
+
+  <p>This is not song identification. We already know which song it is &mdash; the user imported it. The only unknown is <b>position</b>: which millisecond of the track is playing right now, and how fast the phone's clock is drifting against the venue's. That is a much easier problem than Shazam solves, and it can be solved entirely on-device against a local index of a few dozen tracks.</p>
+
+  <figure>
+    <div class="figbox">
+      <svg viewBox="0 0 900 300" role="img" aria-label="Fingerprint alignment loop: microphone audio is hashed into landmark peak pairs, matched against the local reference index, producing an offset histogram whose peak feeds a drift filter that continuously corrects the show scheduler's clock.">
+        <defs>
+          <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
+          <marker id="ar2c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0D7590"/></marker>
+          <marker id="ar2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#E8890B"/></marker>
+        </defs>
+        <g font-family="Archivo, sans-serif" font-size="11.5" fill="currentColor">
+
+          <!-- offline lane -->
+          <text x="8" y="26" font-size="10" font-weight="600" letter-spacing="1.4" opacity=".55">AT IMPORT · ONCE</text>
+          <line x1="8" y1="34" x2="892" y2="34" stroke="currentColor" stroke-width="1" opacity=".2"/>
+          <rect x="8" y="48" width="126" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <text x="71" y="72" text-anchor="middle" font-weight="600">Reference track</text>
+          <line x1="134" y1="68" x2="166" y2="68" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+          <rect x="168" y="48" width="140" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <text x="238" y="66" text-anchor="middle" font-weight="600">Landmark hashes</text>
+          <text x="238" y="80" text-anchor="middle" font-size="9.5" opacity=".6">peak pairs → f1,f2,Δt</text>
+          <line x1="308" y1="68" x2="340" y2="68" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+          <rect x="342" y="48" width="126" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <text x="405" y="66" text-anchor="middle" font-weight="600">Local index</text>
+          <text x="405" y="80" text-anchor="middle" font-size="9.5" opacity=".6">~1.5 MB / track</text>
+
+          <!-- live lane -->
+          <text x="8" y="126" font-size="10" font-weight="600" letter-spacing="1.4" fill="#0D7590">IN THE ARENA · EVERY 500 ms</text>
+          <line x1="8" y1="134" x2="892" y2="134" stroke="#0D7590" stroke-width="1" opacity=".35"/>
+
+          <rect x="8" y="152" width="112" height="46" rx="4" fill="none" stroke="#0D7590" stroke-width="1.4"/>
+          <text x="64" y="171" text-anchor="middle" font-weight="600" fill="#0D7590">Microphone</text>
+          <text x="64" y="185" text-anchor="middle" font-size="9.5" fill="#0D7590" opacity=".8">UNPROCESSED</text>
+
+          <line x1="120" y1="175" x2="152" y2="175" stroke="#0D7590" stroke-width="1.4" marker-end="url(#ar2c)"/>
+          <text x="136" y="167" text-anchor="middle" font-size="9.5" opacity=".6">4 s ring</text>
+
+          <rect x="154" y="152" width="112" height="46" rx="4" fill="none" stroke="#0D7590" stroke-width="1.4"/>
+          <text x="210" y="171" text-anchor="middle" font-weight="600" fill="#0D7590">Hash window</text>
+          <text x="210" y="185" text-anchor="middle" font-size="9.5" fill="#0D7590" opacity=".8">same algorithm</text>
+
+          <line x1="266" y1="175" x2="298" y2="175" stroke="#0D7590" stroke-width="1.4" marker-end="url(#ar2c)"/>
+          <!-- index feeds match -->
+          <path d="M405 88 L405 120 L348 120 L348 172" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".5" marker-end="url(#ar2)"/>
+          <text x="412" y="112" font-size="9.5" opacity=".6">loaded at showtime</text>
+
+          <rect x="300" y="152" width="112" height="46" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <text x="356" y="177" text-anchor="middle" font-weight="600">Match</text>
+
+          <line x1="412" y1="175" x2="444" y2="175" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+
+          <rect x="446" y="146" width="132" height="58" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <text x="512" y="164" text-anchor="middle" font-weight="600">Offset histogram</text>
+          <!-- little histogram -->
+          <g stroke="currentColor" stroke-width="2.5" opacity=".35">
+            <line x1="466" y1="194" x2="466" y2="188"/><line x1="474" y1="194" x2="474" y2="184"/>
+            <line x1="490" y1="194" x2="490" y2="186"/><line x1="506" y1="194" x2="506" y2="189"/>
+            <line x1="530" y1="194" x2="530" y2="185"/><line x1="546" y1="194" x2="546" y2="190"/>
+            <line x1="558" y1="194" x2="558" y2="187"/>
+          </g>
+          <line x1="514" y1="194" x2="514" y2="172" stroke="#E8890B" stroke-width="3"/>
+          <text x="522" y="178" font-size="9.5" fill="#E8890B">t = 47.32 s</text>
+
+          <line x1="578" y1="175" x2="610" y2="175" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar2)"/>
+          <text x="594" y="167" text-anchor="middle" font-size="9.5" opacity=".6">+ conf</text>
+
+          <rect x="612" y="146" width="126" height="58" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <text x="675" y="168" text-anchor="middle" font-weight="600">Drift filter</text>
+          <text x="675" y="183" text-anchor="middle" font-size="9.5" opacity=".6">Kalman (offset,</text>
+          <text x="675" y="195" text-anchor="middle" font-size="9.5" opacity=".6">rate, propagation)</text>
+
+          <line x1="738" y1="175" x2="770" y2="175" stroke="#E8890B" stroke-width="1.5" marker-end="url(#ar2a)"/>
+          <rect x="772" y="140" width="120" height="70" rx="4" fill="#E8890B" fill-opacity=".1" stroke="#E8890B" stroke-width="1.5"/>
+          <text x="832" y="166" text-anchor="middle" font-weight="700" fill="#E8890B">Scheduler</text>
+          <text x="832" y="182" text-anchor="middle" font-size="9.5" fill="#E8890B" opacity=".85">torch · screen</text>
+          <text x="832" y="195" text-anchor="middle" font-size="9.5" fill="#E8890B" opacity=".85">· haptics</text>
+
+          <!-- feedback loop -->
+          <path d="M675 204 L675 250 L210 250 L210 200" fill="none" stroke="#0D7590" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#ar2c)"/>
+          <text x="442" y="266" text-anchor="middle" font-size="10" fill="#0D7590">predicted position narrows the next search to ±2 s — 40× cheaper than a cold match</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption><b>The loop gets cheaper once it has locked.</b> A cold match searches the whole track; a warm one only needs to confirm a predicted position, which is what makes a 500 ms re-lock cadence affordable on a mid-range CPU. The dashed edge is the difference between an app that finds the song once and one that stays with it.</figcaption>
+  </figure>
+
+  <h3><span class="n">10.1</span><span>Requirements</span></h3>
+  <ul class="reqs">
+    <li><span class="id">LIV-01</span><div><b>Cold lock in &le; 3 s</b> at 75 dB SPL with typical crowd noise, p90. The user should tap "listen" and see it catch before they lose faith.</div></li>
+    <li><span class="id">LIV-02</span><div><b>Warm re-lock every 500 ms</b>, constrained to &plusmn;2 s around the predicted position, costing &lt; 6% of one core.</div></li>
+    <li><span class="id">LIV-03</span><div><b>Unprocessed capture.</b> Request <code>MediaRecorder.AudioSource.UNPROCESSED</code> where <code>PROPERTY_SUPPORT_AUDIO_SOURCE_UNPROCESSED</code> is true; else <code>VOICE_RECOGNITION</code>; never <code>MIC</code> with AGC and noise suppression mangling the spectrum. Capture at 44.1 or 48 kHz through AAudio in low-latency mode.</div></li>
+    <li><span class="id">LIV-04</span><div><b>Track drift, don't just re-seek.</b> A Kalman filter over (offset, rate) absorbs crystal drift between the venue's playback clock and the phone's &mdash; typically 10&ndash;50 ppm, so 0.6&ndash;3 ms per minute. Small, but it accumulates across a set and jumping the show to correct it looks worse than the drift.</div></li>
+    <li><span class="id">LIV-05</span><div><b>Coast, don't stop.</b> If confidence drops, keep running on the filter's prediction for up to <b>8 s</b> before declaring loss of lock. A brief crowd roar over the chorus must not kill the show.</div></li>
+    <li><span class="id">LIV-06</span><div><b>Show the state honestly.</b> Three states only &mdash; <span class="chip c-info" style="margin:0 2px">Listening</span> <span class="chip c-ok" style="margin:0 2px">Locked</span> <span class="chip c-deg" style="margin:0 2px">Coasting</span> &mdash; with a confidence bar. Never fake a lock.</div></li>
+  </ul>
+
+  <h3><span class="n">10.2</span><span>Where this fails, honestly</span></h3>
+  <p>Fingerprint alignment against a studio master fails on the thing artists most want to light: <b>the live performance</b>. A band playing the song on stage is a different recording &mdash; different tempo, different arrangement, different everything. The fingerprints will not match. Phase 2 works for walk-out music, DJ sets, arena playlists, pre-recorded backing tracks and stadium moments where a known cut is played over the PA. It does <em>not</em> work for a live band, and we should say so in the marketing rather than have a tour manager discover it in soundcheck. Live performance needs the ultrasonic tier, or a click-track feed, and that is a real reason &sect;12 exists.</p>
+</section>
+
+<!-- 11 -->
+<section id="s11">
+  <h2><span class="n">11</span><span>The 3 ms/metre problem</span></h2>
+  <p class="sub">The most important physical constraint in the product, and the one most likely to be discovered late.</p>
+
+  <p>Sound travels at roughly 343 m/s. Every phone syncing to what its microphone hears is therefore syncing to a version of the song delayed by its distance from the speakers &mdash; about <b>3 ms per metre</b>. In a 100-metre bowl, the back row is nearly a third of a second behind the front row, and no amount of DSP fixes it, because the information genuinely has not arrived yet.</p>
+
+  <figure>
+    <div class="figbox">
+      <svg viewBox="0 0 900 260" role="img" aria-label="Arena cross-section showing sound from the PA stack arriving at rows 20, 60 and 100 metres away after 58, 175 and 291 milliseconds respectively, producing a flash wave that rolls back through the crowd rather than a simultaneous flash.">
+        <defs>
+          <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor" opacity=".55"/></marker>
+        </defs>
+        <g font-family="Archivo, sans-serif" font-size="11.5" fill="currentColor">
+          <!-- stage -->
+          <rect x="14" y="86" width="58" height="96" rx="3" fill="currentColor" opacity=".85"/>
+          <text x="43" y="130" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--surface)" style="fill:var(--surface)">PA</text>
+          <text x="43" y="145" text-anchor="middle" font-size="10.5" font-weight="600" fill="var(--surface)" style="fill:var(--surface)">stack</text>
+          <text x="43" y="200" text-anchor="middle" font-size="10" opacity=".55">t = 0</text>
+
+          <!-- wavefronts -->
+          <g fill="none" stroke="currentColor" opacity=".2">
+            <path d="M78 60 Q 168 134 78 208" stroke-width="1.4"/>
+            <path d="M78 44 Q 330 134 78 224" stroke-width="1.4"/>
+            <path d="M78 30 Q 500 134 78 238" stroke-width="1.4"/>
+          </g>
+
+          <!-- rows -->
+          <g>
+            <!-- row A -->
+            <line x1="186" y1="60" x2="186" y2="208" stroke="currentColor" stroke-width="1" opacity=".22" stroke-dasharray="3 4"/>
+            <g fill="#E8890B">
+              <circle cx="186" cy="86" r="4.5"/><circle cx="186" cy="112" r="4.5"/>
+              <circle cx="186" cy="138" r="4.5"/><circle cx="186" cy="164" r="4.5"/>
+            </g>
+            <text x="186" y="44" text-anchor="middle" font-size="10.5" font-weight="600">20 m</text>
+            <text x="186" y="197" text-anchor="middle" font-size="12" font-weight="700" fill="#E8890B" font-family="'JetBrains Mono', monospace">58 ms</text>
+
+            <!-- row B -->
+            <line x1="420" y1="60" x2="420" y2="208" stroke="currentColor" stroke-width="1" opacity=".22" stroke-dasharray="3 4"/>
+            <g fill="#E8890B" opacity=".68">
+              <circle cx="420" cy="86" r="4.5"/><circle cx="420" cy="112" r="4.5"/>
+              <circle cx="420" cy="138" r="4.5"/><circle cx="420" cy="164" r="4.5"/>
+            </g>
+            <text x="420" y="44" text-anchor="middle" font-size="10.5" font-weight="600">60 m</text>
+            <text x="420" y="197" text-anchor="middle" font-size="12" font-weight="700" fill="#E8890B" font-family="'JetBrains Mono', monospace">175 ms</text>
+
+            <!-- row C -->
+            <line x1="654" y1="60" x2="654" y2="208" stroke="currentColor" stroke-width="1" opacity=".22" stroke-dasharray="3 4"/>
+            <g fill="#E8890B" opacity=".4">
+              <circle cx="654" cy="86" r="4.5"/><circle cx="654" cy="112" r="4.5"/>
+              <circle cx="654" cy="138" r="4.5"/><circle cx="654" cy="164" r="4.5"/>
+            </g>
+            <text x="654" y="44" text-anchor="middle" font-size="10.5" font-weight="600">100 m</text>
+            <text x="654" y="197" text-anchor="middle" font-size="12" font-weight="700" fill="#E8890B" font-family="'JetBrains Mono', monospace">291 ms</text>
+          </g>
+
+          <!-- spread bracket -->
+          <line x1="186" y1="228" x2="654" y2="228" stroke="currentColor" stroke-width="1" opacity=".5" marker-start="url(#ar3)" marker-end="url(#ar3)"/>
+          <text x="420" y="248" text-anchor="middle" font-size="11" opacity=".7">233 ms of spread front to back — visible as a wave, not an error</text>
+
+          <text x="700" y="90" font-size="10.5" opacity=".6">delay towers add</text>
+          <text x="700" y="105" font-size="10.5" opacity=".6">their own 40–120 ms,</text>
+          <text x="700" y="120" font-size="10.5" opacity=".6">and are already</text>
+          <text x="700" y="135" font-size="10.5" opacity=".6">time-aligned to the</text>
+          <text x="700" y="150" font-size="10.5" opacity=".6">main hangs — so a</text>
+          <text x="700" y="165" font-size="10.5" opacity=".6">phone under one is</text>
+          <text x="700" y="180" font-size="10.5" opacity=".6">correct for its seat.</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption><b>Every ear-synced phone is late by its own distance from the stage.</b> The spread is not a bug we can engineer away &mdash; it is the speed of sound. The design question is whether to fight it, and the answer is mostly no.</figcaption>
+  </figure>
+
+  <h3><span class="n">11.1</span><span>What to do about it</span></h3>
+  <div class="tw"><table>
+    <thead><tr><th style="width:22%">Option</th><th style="width:36%">Mechanism</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td><b>Accept it</b> <span class="chip c-ok">v1</span></td><td>Do nothing. Each phone syncs to what it hears.</td><td><b>Ship this.</b> The result is a flash wave rolling away from the stage at the speed of sound &mdash; which is what a real crowd wave looks like and reads as intentional. It is also exactly what CUE's ultrasonic system produces, for the same reason.</td></tr>
+      <tr><td><b>Seat-section input</b></td><td>User picks their section; app subtracts a per-section delay from a venue map.</td><td>Adds a friction step at the worst moment and needs a venue database. Only worth it for a pro tier where the operator wants a flat front.</td></tr>
+      <tr><td><b>Network time base</b></td><td>NTP-disciplined clock plus a show start timestamp; audio only used to confirm.</td><td>Gives a genuinely flat wavefront, but requires connectivity in a building where 50,000 people are all on the same cell. Pro tier only, with the audio path as fallback.</td></tr>
+      <tr><td><b>Deliberate wave</b></td><td>Add delay <em>on purpose</em>, per section, to sweep light across the bowl.</td><td>A genuinely good feature for Phase 3 &mdash; if you can measure position you can choreograph it. Park it.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note key">
+    <span class="lbl">Design consequence</span>
+    <p>Because the spread is unavoidable, <b>tight per-phone timing still matters enormously</b>. The wave only reads as a wave if each phone is crisp against its <em>own</em> local audio. Sloppy 80 ms jitter on top of the propagation gradient turns a wave into mush. This is why the &plusmn;20 ms budget in &sect;14 is worth fighting for even though the room has 233 ms of spread in it.</p>
+  </div>
+</section>
+
+<!-- 12 -->
+<section id="s12">
+  <h2><span class="n">12</span><span>Ultrasonic venue tier</span></h2>
+  <p class="sub">Phase 3. CUE's mechanism, offered to venues who want a guarantee rather than a best effort.</p>
+
+  <figure>
+    <div class="figbox">
+      <svg viewBox="0 0 900 250" role="img" aria-label="Comparison of the two sync paths: the fingerprint path needs only the phone and the PA it can already hear, while the ultrasonic path inserts an encoder into the PA rack that adds a dedicated 18 kilohertz clock channel, replacing the match-and-estimate step with a directly decoded frame counter.">
+        <defs>
+          <marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
+          <marker id="ar4c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0D7590"/></marker>
+        </defs>
+        <g font-family="Archivo, sans-serif" font-size="11.5" fill="currentColor">
+
+          <text x="8" y="20" font-size="10" font-weight="600" letter-spacing="1.3" opacity=".55">TIER 1 · FINGERPRINT — NO VENUE INTEGRATION</text>
+          <rect x="8" y="34" width="96" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <text x="56" y="60" text-anchor="middle" font-weight="600">Playback</text>
+          <line x1="104" y1="55" x2="136" y2="55" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar4)"/>
+          <rect x="138" y="34" width="80" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <text x="178" y="60" text-anchor="middle" font-weight="600">PA</text>
+          <line x1="218" y1="55" x2="250" y2="55" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar4)"/>
+          <text x="234" y="47" text-anchor="middle" font-size="9.5" opacity=".55">music</text>
+          <rect x="252" y="34" width="88" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <text x="296" y="60" text-anchor="middle" font-weight="600">Mic</text>
+          <line x1="340" y1="55" x2="372" y2="55" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar4)"/>
+          <rect x="374" y="28" width="150" height="54" rx="4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="5 3"/>
+          <text x="449" y="49" text-anchor="middle" font-weight="600">Match &amp; estimate</text>
+          <text x="449" y="65" text-anchor="middle" font-size="9.5" opacity=".6">probabilistic, 3 s lock</text>
+          <line x1="524" y1="55" x2="556" y2="55" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar4)"/>
+          <rect x="558" y="34" width="104" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <text x="610" y="60" text-anchor="middle" font-weight="600">Scheduler</text>
+          <text x="678" y="52" font-size="10.5" opacity=".6">± 40 ms typical,</text>
+          <text x="678" y="66" font-size="10.5" opacity=".6">degrades in noise</text>
+
+          <line x1="8" y1="108" x2="892" y2="108" stroke="currentColor" stroke-width="1" opacity=".18"/>
+
+          <text x="8" y="140" font-size="10" font-weight="600" letter-spacing="1.3" fill="#0D7590">TIER 2 · ULTRASONIC — ONE BOX IN THE PA RACK</text>
+          <rect x="8" y="154" width="96" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <text x="56" y="180" text-anchor="middle" font-weight="600">Playback</text>
+          <line x1="104" y1="175" x2="136" y2="175" stroke="currentColor" stroke-width="1.2" marker-end="url(#ar4)"/>
+
+          <rect x="138" y="148" width="80" height="54" rx="4" fill="#0D7590" fill-opacity=".12" stroke="#0D7590" stroke-width="1.6"/>
+          <text x="178" y="170" text-anchor="middle" font-weight="700" fill="#0D7590">Encoder</text>
+          <text x="178" y="185" text-anchor="middle" font-size="9.5" fill="#0D7590">18 kHz</text>
+          <text x="178" y="196" text-anchor="middle" font-size="9.5" fill="#0D7590" opacity=".8">+ clock</text>
+          <text x="178" y="220" text-anchor="middle" font-size="10" fill="#0D7590">the added part</text>
+
+          <line x1="218" y1="175" x2="250" y2="175" stroke="#0D7590" stroke-width="1.4" marker-end="url(#ar4c)"/>
+          <rect x="252" y="154" width="88" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <text x="296" y="180" text-anchor="middle" font-weight="600">PA → Mic</text>
+          <line x1="340" y1="175" x2="372" y2="175" stroke="#0D7590" stroke-width="1.4" marker-end="url(#ar4c)"/>
+          <text x="356" y="167" text-anchor="middle" font-size="9.5" fill="#0D7590">music + carrier</text>
+
+          <rect x="374" y="148" width="150" height="54" rx="4" fill="#0D7590" fill-opacity=".12" stroke="#0D7590" stroke-width="1.6"/>
+          <text x="449" y="169" text-anchor="middle" font-weight="700" fill="#0D7590">Decode frame N</text>
+          <text x="449" y="185" text-anchor="middle" font-size="9.5" fill="#0D7590" opacity=".85">deterministic, &lt;1 s</text>
+
+          <line x1="524" y1="175" x2="556" y2="175" stroke="#0D7590" stroke-width="1.4" marker-end="url(#ar4c)"/>
+          <rect x="558" y="154" width="104" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <text x="610" y="180" text-anchor="middle" font-weight="600">Scheduler</text>
+          <text x="678" y="172" font-size="10.5" opacity=".6">± 10 ms, works on</text>
+          <text x="678" y="186" font-size="10.5" opacity=".6">any audio incl. live</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption><b>The only structural difference is the encoder in the PA rack.</b> Everything downstream of the microphone gets simpler because position stops being estimated and starts being transmitted &mdash; which is also why the ultrasonic tier works for live performance, where fingerprinting cannot.</figcaption>
+  </figure>
+
+  <h3><span class="n">12.1</span><span>Signal design</span></h3>
+  <div class="tw"><table>
+    <thead><tr><th style="width:24%">Parameter</th><th style="width:24%">Value</th><th>Reasoning</th></tr></thead>
+    <tbody>
+      <tr><td>Band</td><td class="num">17.6 &ndash; 19.4 kHz</td><td>Above the hearing of most adults, below the point where phone mics and PA drivers roll off hard. Matches the band CUE proved at stadium scale.</td></tr>
+      <tr><td>Modulation</td><td class="num">8-tone MFSK</td><td>3 bits/symbol. Robust against the multipath and reverb that destroy phase-coherent schemes in a concrete bowl.</td></tr>
+      <tr><td>Symbol rate</td><td class="num">~20 Bd</td><td>50 ms symbols. Long enough that a reflection arriving 30 ms late still lands inside the symbol.</td></tr>
+      <tr><td>Payload rate</td><td class="num">~25 bps net</td><td>After a Reed&ndash;Solomon outer code and preamble overhead. Same order as CUE, for the same physical reasons.</td></tr>
+      <tr><td>Packet</td><td class="num">preamble + 24 bits</td><td>Chirp preamble for timing, then 8-bit show ID + 14-bit frame counter + 2-bit command. Repeats continuously &mdash; a phone joining late locks on the next packet.</td></tr>
+      <tr><td>Frame resolution</td><td class="num">125 ms</td><td>The counter names an eighth-second slot; sub-frame position comes from preamble correlation, which is accurate to a few ms.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3><span class="n">12.2</span><span>What will go wrong with it</span></h3>
+  <ul>
+    <li><b>The PA eats the carrier.</b> House systems are routinely low-passed at 16&ndash;18 kHz, and limiters and lossy codecs in the distribution chain will attack a constant high-frequency tone. Requires a soundcheck procedure and a measured headroom report per venue. This is an install service, not a download.</li>
+    <li><b>Teenagers can hear it.</b> Hearing at 17.6 kHz is common under 25 &mdash; exactly the audience at most of these events. Sweep upward within the band and keep level as low as the error rate allows.</li>
+    <li><b>Phone mics are hostile to it.</b> Many devices apply anti-aliasing roll-off, and every noise-suppression path treats a steady tone as noise to remove. <code>UNPROCESSED</code> capture is mandatory here, not preferred, and devices that don't offer it fall back to the fingerprint tier.</li>
+    <li><b>Bandwidth is tiny.</b> 25 bps carries a clock and nothing else. Show content must be distributed before the event, which reinforces the &sect;7 requirement that beat maps be small and portable.</li>
+  </ul>
+</section>
+
+<hr>
+
+<!-- 13 -->
+<section id="s13">
+  <h2><span class="n">13</span><span>Output &amp; scheduler</span></h2>
+  <p class="sub">Where the software meets the hardware, and where all the timing is won or lost.</p>
+
+  <h3><span class="n">13.1</span><span>Torch driver</span></h3>
+  <p>Torch control is <code>CameraManager.setTorchMode()</code>. Notably it needs <b>no <code>CAMERA</code> permission</b>, because no camera device is opened &mdash; a genuinely useful fact for onboarding, and worth confirming per OEM. On Android 13+, <code>turnOnTorchWithStrengthLevel()</code> gives graded brightness, gated on <code>FLASH_INFO_STRENGTH_MAXIMUM_LEVEL &gt; 1</code>.</p>
+
+  <ul class="reqs">
+    <li><span class="id">TCH-01</span><div><b>Capability probe on first run.</b> Measure actual round-trip latency and the fastest reliable toggle rate, store a device profile, and never re-measure unless the OS version changes. Probe runs with the screen dimmed and asks the user to point the phone at a wall for two seconds.</div></li>
+    <li><span class="id">TCH-02</span><div><b>Subtract measured latency at compile time.</b> The scheduler fires <span class="mono">L</span> milliseconds early where <span class="mono">L</span> is the device's measured actuation delay, typically 5&ndash;40 ms and occasionally worse.</div></li>
+    <li><span class="id">TCH-03</span><div><b>Graded strength where available.</b> Map salience to strength on Android 13+; fall back to modulating pulse <em>duration</em> below 13, since a longer flash reads as brighter.</div></li>
+    <li><span class="id">TCH-04</span><div><b>Register a torch callback.</b> <code>registerTorchCallback</code> catches another app or the quick-settings tile stealing the torch, so we can pause rather than fight it.</div></li>
+    <li><span class="id">TCH-05</span><div><b>Duty-cycle guard.</b> Hard cap the torch at 35% duty over any rolling 10 s window. Beyond that, LED drivers current-limit or cut out entirely, and the phone gets hot enough that the user notices.</div></li>
+  </ul>
+
+  <h3><span class="n">13.2</span><span>Screen</span></h3>
+  <p>The screen is the better instrument and should not be treated as the torch's sidekick. It does colour, it does smooth ramps at display refresh rate, it costs nothing thermally compared to the LED, and it works on every device regardless of flash hardware. Full-screen colour with <code>WindowManager.LayoutParams.screenBrightness = 1.0f</code> and the keep-screen-on flag; render through Compose with a <code>withFrameNanos</code> loop so ramps land on real vsync boundaries.</p>
+
+  <h3><span class="n">13.3</span><span>The scheduler</span></h3>
+  <p>One dedicated thread at <code>THREAD_PRIORITY_URGENT_AUDIO</code> owns all output. It holds the frozen cue array and a monotonic clock, and does nothing else.</p>
+  <ul class="reqs">
+    <li><span class="id">SCH-01</span><div><b>Monotonic clock only.</b> <code>SystemClock.elapsedRealtimeNanos()</code>. Wall clock jumps on NTP correction and timezone change; using it means a show can skip mid-song.</div></li>
+    <li><span class="id">SCH-02</span><div><b>No <code>Handler.postDelayed</code>, no coroutine <code>delay</code>.</b> Both are subject to message-queue backlog, Doze and GC pauses, and both routinely overshoot by tens of milliseconds. Sleep in a loop to within 2 ms of target, then busy-wait the remainder.</div></li>
+    <li><span class="id">SCH-03</span><div><b>Never allocate in the loop.</b> No boxing, no iterators, no logging on the hot path. A GC pause during a chorus is a visible glitch.</div></li>
+    <li><span class="id">SCH-04</span><div><b>Drop, don't queue.</b> A cue whose time has already passed by more than 30 ms is discarded, never fired late. Late light is worse than absent light &mdash; the eye reads it as wrong, not as delayed.</div></li>
+    <li><span class="id">SCH-05</span><div><b>Foreground service with a wake lock</b> so the show survives the screen timing out or the user switching apps mid-track.</div></li>
+  </ul>
+
+  <h3><span class="n">13.4</span><span>Playback clock in Phase 1</span></h3>
+  <div class="note">
+    <span class="lbl">The single most common way to get this wrong</span>
+    <p>In Phase 1 the app is both the audio source and the light source, so it is tempting to start a timer when playback starts and schedule from that. Don't &mdash; <code>AudioTrack</code> buffers 50&ndash;200 ms and the exact figure varies by device, route and whether Bluetooth is involved. A Bluetooth speaker adds 150&ndash;250 ms on top of that.</p>
+    <p>Use <code>AudioTrack.getTimestamp()</code>, which returns a (frame position, nanoTime) pair describing which frame is <em>actually leaving the DAC</em>. Sample it every ~200 ms, fit a line, and drive the scheduler from that fit. When it is unavailable, fall back to <code>getPlaybackHeadPosition()</code> minus <code>AudioManager.getProperty(PROPERTY_OUTPUT_FRAMES_PER_BUFFER)</code> and mark the session as low-confidence in telemetry.</p>
+  </div>
+</section>
+
+<!-- 14 -->
+<section id="s14">
+  <h2><span class="n">14</span><span>Latency budget</span></h2>
+  <p class="sub">Every millisecond between the beat existing and the photon leaving, and who owns it.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th style="width:26%">Stage</th><th style="width:13%">Typical</th><th style="width:13%">Worst</th><th style="width:18%">Handling</th><th>Residual</th></tr></thead>
+    <tbody>
+      <tr><td><b>Mic capture</b> <span style="color:var(--ink-3)">(P2)</span></td><td class="num">20 ms</td><td class="num">80 ms</td><td>AAudio low-latency; measure in the calibration probe</td><td>Constant &mdash; fully compensated</td></tr>
+      <tr><td><b>Fingerprint match</b> <span style="color:var(--ink-3)">(P2)</span></td><td class="num">40 ms</td><td class="num">120 ms</td><td>Runs off the hot path; the filter predicts forward</td><td>None &mdash; prediction absorbs it</td></tr>
+      <tr><td><b>Filter estimation error</b> <span style="color:var(--ink-3)">(P2)</span></td><td class="num">&plusmn;15 ms</td><td class="num">&plusmn;60 ms</td><td>Improves with lock duration and SNR</td><td class="num">&plusmn;15 ms</td></tr>
+      <tr><td><b>Scheduler wake jitter</b></td><td class="num">1 ms</td><td class="num">8 ms</td><td>Urgent-audio thread, busy-wait tail</td><td class="num">&plusmn;2 ms</td></tr>
+      <tr><td><b>Torch actuation</b></td><td class="num">18 ms</td><td class="num">45 ms</td><td>Measured per device, subtracted at compile</td><td class="num">&plusmn;5 ms</td></tr>
+      <tr><td><b>Screen present</b></td><td class="num">16 ms</td><td class="num">33 ms</td><td>One vsync; aligned via <code>withFrameNanos</code></td><td class="num">&plusmn;8 ms</td></tr>
+      <tr><td><b>Playback output</b> <span style="color:var(--ink-3)">(P1)</span></td><td class="num">80 ms</td><td class="num">250 ms</td><td><code>getTimestamp()</code> gives ground truth</td><td class="num">&plusmn;3 ms</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="cards">
+    <div><dt>Phase 1 total</dt><dd><span class="big">±11 ms</span>p95, torch against local playback. Comfortably inside budget.</dd></div>
+    <div><dt>Phase 2 total</dt><dd><span class="big">±18 ms</span>p95 once locked, plus unavoidable propagation delay (&sect;11).</dd></div>
+    <div><dt>Perceptual floor</dt><dd><span class="big">~50 ms</span>where a crowd starts to read the light as out of time with the music.</dd></div>
+  </div>
+
+  <p>The headroom between our &plusmn;18 ms and the ~50 ms perceptual floor is what absorbs a bad device, a hot phone or a weak lock without the show visibly breaking. Spending it on convenient-but-jittery APIs is how products in this category end up feeling cheap.</p>
+</section>
+
+<!-- 15 -->
+<section id="s15">
+  <h2><span class="n">15</span><span>Safety &amp; compliance</span></h2>
+  <p class="sub">A flashing light in a dark arena in front of a large crowd. This section outranks every other requirement in this document.</p>
+
+  <div class="note hot">
+    <span class="lbl">Non-negotiable</span>
+    <p>Photosensitive epilepsy affects roughly 1 in 4,000 people, and seizures are provoked most readily between <b>3 and 30 Hz</b>, with peak sensitivity around 15&ndash;20 Hz. WCAG 2.3.1 permits no more than three general flashes per second. Ofcom's guidance for public events recommends staying under 4 Hz. A torch LED is a small, extremely high-contrast point source in a dark room &mdash; the worst case for this risk, and there will be thousands of them.</p>
+    <p>At an arena's scale, "1 in 4,000" means <b>a dozen susceptible people in a 50,000-seat bowl, every single night</b>. This is not a theoretical compliance box.</p>
+  </div>
+
+  <h3><span class="n">15.1</span><span>Hard limits</span></h3>
+  <div class="tw"><table>
+    <thead><tr><th style="width:30%">Limit</th><th style="width:16%">Value</th><th>Enforcement</th></tr></thead>
+    <tbody>
+      <tr><td>Max flash rate, any channel</td><td class="num">3.0 Hz</td><td>Enforced in the compiler <em>and</em> re-checked in the scheduler. Two independent gates, because one can be bypassed by a bug.</td></tr>
+      <tr><td>Default target rate</td><td class="num">&le; 2.5 Hz</td><td>Styles are authored to sit below the cap, so the limiter is an exception path rather than the normal one.</td></tr>
+      <tr><td>Sustained run at the cap</td><td class="num">advisory</td><td><b>Corrected in build.</b> This row previously specified a hard 5-flash burst limit. That was a mis-transcription of the <em>moderate-flash allowance</em> in the guidance, and enforcing it deleted 235 of 240 cues at 180 BPM &mdash; WCAG 2.3.1 permits three flashes per second with no limit on duration. The limiter now reports the longest at-cap stretch and suggests a wider spacing; it deletes nothing on account of it.</td></tr>
+      <tr><td>Screen luminance delta</td><td class="num">&lt; 10%</td><td>of full-screen area above the Harding relative-luminance threshold, when transitions exceed 3 Hz.</td></tr>
+      <tr><td>Red flash</td><td class="num">forbidden</td><td>Saturated red transitions are disproportionately provocative. Blocked in the palette, not just discouraged.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3><span class="n">15.2</span><span>The limiter, and the BPM arithmetic</span></h3>
+  <p>3 Hz is exactly 180 BPM. Flashing on every beat is therefore safe for most music &mdash; 128 BPM house is 2.13 Hz, 140 BPM trap is 2.33 Hz &mdash; and unsafe above 180: drum &amp; bass at 174 is borderline, hardstyle at 150 with eighth-note hits is 5 Hz and plainly over. The limiter is a real code path that fires often, not a formality.</p>
+  <pre><code><span class="c">// runs on every compile; may delete cues; cannot be disabled</span>
+1. sort cues by time
+2. sliding 1 s window over the cue list
+3. while window.count &gt; 3:
+     drop the lowest-salience cue in the window   <span class="c">// keep the musical hits</span>
+4. if drops exceeded 20% of cues:
+     escalate subdivision (beats → 2nd → 4th → downbeats), recompile
+     tell the user: "Auto-set to every 2nd beat — 174 BPM exceeds
+                     the safe flash rate on every beat."
+5. assert max rate ≤ 3.0 Hz or refuse to arm the show</code></pre>
+  <p>Note step 3's ordering: when we must drop cues we drop the <em>weakest</em> ones, so the surviving pattern still lands on the hits that matter. A naive every-other-cue decimation would produce a rhythmically wrong show that is merely safe.</p>
+
+  <h3><span class="n">15.3</span><span>User-facing safety</span></h3>
+  <ul class="reqs">
+    <li><span class="id">SAF-01</span><div><b>Consent before the first show, not at install.</b> A plain-language photosensitivity warning naming the risk, with equal-weight <b>Continue</b> and <b>Use no-flash mode</b> buttons. Recorded with a timestamp and re-shown after any update that changes the limiter.</div></li>
+    <li><span class="id">SAF-02</span><div><b>Reduced-flash mode.</b> Screen-only, smooth ramps, no transition faster than 1 Hz. Reachable in one tap from the show screen, and honoured as a persistent preference.</div></li>
+    <li><span class="id">SAF-03</span><div><b>Respect <code>ACCESSIBILITY_DISPLAY_ANIMATION_DISABLED</code>.</b> If the user has told the OS they don't want animation, default them into reduced-flash and say why.</div></li>
+    <li><span class="id">SAF-04</span><div><b>Panic stop.</b> Any touch anywhere on the show screen stops all output within 100 ms. Also bound to either volume key. No confirmation dialog.</div></li>
+    <li><span class="id">SAF-05</span><div><b>Three-second countdown</b> before any show arms, with a visible cancel. Nobody's phone starts strobing unexpectedly in their pocket.</div></li>
+    <li><span class="id">SAF-06</span><div><b>Never fire when face-down or pocketed.</b> Proximity plus accelerometer; a torch strobing against fabric is a burn and battery risk with no upside.</div></li>
+    <li><span class="id">SAF-07</span><div><b>Ship the limiter's report.</b> The show detail screen states the peak flash rate of the compiled show in Hz. Designers should be able to see the number, not trust a promise.</div></li>
+  </ul>
+
+  <h3><span class="n">15.4</span><span>Thermal &amp; power</span></h3>
+  <p>Subscribe to <code>PowerManager.addThermalStatusListener</code> and degrade in defined stages rather than letting the OS throttle us unpredictably: at <span class="mono">MODERATE</span> drop torch strength 30%; at <span class="mono">SEVERE</span> switch to screen-only and tell the user; at <span class="mono">CRITICAL</span> stop the show. Mirror this for battery: below 15% offer to switch to screen-only, below 5% stop. A phone that dies at the encore is a worse outcome than a dimmer show.</p>
+</section>
+
+<!-- 16 -->
+<section id="s16">
+  <h2><span class="n">16</span><span>Architecture</span></h2>
+  <p class="sub">Native Android, with the DSP in C++ so the eventual iOS port is a UI project rather than a rewrite.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th style="width:20%">Layer</th><th style="width:26%">Technology</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>UI</td><td>Jetpack Compose, Material 3</td><td>The waveform is a single custom Canvas; everything else is standard.</td></tr>
+      <tr><td>App logic</td><td>Kotlin, coroutines, Hilt</td><td>Analysis dispatched to a bounded pool; the scheduler is deliberately <em>not</em> a coroutine.</td></tr>
+      <tr><td><b>DSP core</b></td><td><b>Kotlin</b>, plain JVM module<br><span style="font-size:12px;color:var(--ink-3)">was: C++17 via NDK</span></td><td>HPSS, onset, tempo and beat tracking live here, on primitive arrays with no Android dependency, so they are host-tested in CI exactly as the C++ plan intended. <b>Built and measured:</b> a four-minute track analyses in <span class="mono">~2 s</span> on the host, against an 8 s budget, so the native port has no headroom to buy yet. Inner loops stay allocation-free to keep the port mechanical if a low-end device disagrees.</td></tr>
+      <tr><td>Audio in</td><td>Oboe / AAudio</td><td>Low-latency unprocessed capture for Phase 2.</td></tr>
+      <tr><td>Audio out</td><td>AudioTrack direct</td><td>ExoPlayer is heavier than needed and abstracts away <code>getTimestamp()</code>, which we specifically need.</td></tr>
+      <tr><td>Decode</td><td>MediaExtractor + MediaCodec</td><td>Hardware-accelerated, no FFmpeg licensing question, no 20 MB of binary.</td></tr>
+      <tr><td>Output</td><td>Camera2 <code>CameraManager</code></td><td>Torch only; no camera session is ever opened.</td></tr>
+      <tr><td>Storage</td><td>Room + Protobuf blobs</td><td>Metadata queryable; beat maps and fingerprint indexes as opaque blobs on disk.</td></tr>
+      <tr><td>Background</td><td>Foreground service</td><td><code>mediaPlayback</code> type. Torch alone does not require the <code>camera</code> FGS type since no camera device is opened &mdash; verify per OEM before relying on it (&sect;25).</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3><span class="n">16.1</span><span>Module boundaries</span></h3>
+  <ul>
+    <li><code>:core:dsp</code> &mdash; C++ analysis and fingerprinting. No Android dependency. Unit-tested on the host against reference fixtures.</li>
+    <li><code>:core:model</code> &mdash; beat map and show schema, serialisation. Pure Kotlin.</li>
+    <li><code>:core:output</code> &mdash; torch driver, screen driver, haptics, scheduler, device profile. The only module that touches hardware.</li>
+    <li><code>:core:safety</code> &mdash; the limiter. Deliberately its own module so it cannot be casually bypassed and so its tests stand alone.</li>
+    <li><code>:feature:library</code>, <code>:feature:editor</code>, <code>:feature:show</code> &mdash; UI.</li>
+    <li><code>:feature:listen</code> &mdash; Phase 2. Depends on <code>:core:dsp</code> for matching, nothing else new.</li>
+  </ul>
+  <p>The dependency rule that matters: <b>nothing depends on <code>:core:output</code> except the show runner</b>, and <b>the show runner cannot construct a cue list that has not passed through <code>:core:safety</code></b>. Enforce the second with a type &mdash; the compiler emits <code>UnsafeCueList</code>, and only the limiter can produce the <code>ArmedShow</code> the runner accepts.</p>
+</section>
+
+<!-- 17 -->
+<section id="s17">
+  <h2><span class="n">17</span><span>Permissions &amp; privacy</span></h2>
+  <p class="sub">Ask for as little as possible, as late as possible, and be able to explain each one in one sentence.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th style="width:26%">Permission</th><th style="width:12%">Phase</th><th style="width:16%">When asked</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><code>CAMERA</code></td><td class="num">—</td><td><b>Never</b></td><td>Not required for <code>setTorchMode</code>. Requesting it would be the single biggest trust cost in the app for zero benefit.</td></tr>
+      <tr><td><code>READ_MEDIA_AUDIO</code></td><td class="num">—</td><td><b>Never</b></td><td>Avoided entirely by using SAF (&sect;5.1).</td></tr>
+      <tr><td><code>RECORD_AUDIO</code></td><td class="num">P2</td><td>First tap of "Listen"</td><td>With a rationale screen first: what we listen for, that it never leaves the device, and that it stops when the show stops.</td></tr>
+      <tr><td><code>FOREGROUND_SERVICE</code> <span style="color:var(--ink-3)">+ <code>_MEDIA_PLAYBACK</code></span></td><td class="num">P1</td><td>Install-time</td><td>Keeps the show running with the screen off or the app backgrounded.</td></tr>
+      <tr><td><code>POST_NOTIFICATIONS</code></td><td class="num">P1</td><td>Before first show</td><td>Only for the FGS notification, which doubles as the remote stop control.</td></tr>
+      <tr><td><code>VIBRATE</code></td><td class="num">P1</td><td>Install-time</td><td>Normal permission, no prompt.</td></tr>
+      <tr><td><code>INTERNET</code></td><td class="num">P3</td><td>—</td><td>Not requested in P1 or P2 at all. An app with no internet permission is a very strong privacy claim and we should keep it as long as we can.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3><span class="n">17.1</span><span>Microphone commitments</span></h3>
+  <ul>
+    <li>Captured audio lives in a ring buffer and is <b>never written to disk</b> and never transmitted.</li>
+    <li>Only spectral peak hashes are derived from it, and those are discarded within seconds. They are not reversible to audio, and we should still not keep them.</li>
+    <li>Capture stops the instant the show stops or the user leaves the listen screen. The mic indicator in the status bar is a feature, not a problem &mdash; it tells the truth.</li>
+    <li>State this in the rationale screen in one sentence, not in a privacy policy nobody reads.</li>
+  </ul>
+
+  <h3><span class="n">17.2</span><span>Content rights</span></h3>
+  <p>Phase 1 and 2 analyse files the user already possesses, on their own device, and never transmit or reproduce them. That is the same posture as any local music player and is well-trodden ground. Two things to keep clear of: <b>do not upload user audio</b> to any analysis service (which is a reason &sect;6 avoids the cloud option), and <b>do not distribute beat maps for commercial recordings</b> as a content library without legal review &mdash; a beat map is arguably factual metadata, but "arguably" is not a position to build a catalogue on. Phase 3 show packages for a client's own tracks are covered by that client's contract.</p>
+</section>
+
+<hr>
+
+<!-- 18 -->
+<section id="s18">
+  <h2><span class="n">18</span><span>Edge cases &amp; error scenarios</span></h2>
+  <p class="sub">Every failure we can name, what detects it, and what the user sees. <span class="chip c-block" style="margin-left:6px">blocks</span> stops the flow &middot; <span class="chip c-deg">degrades</span> continues with less &middot; <span class="chip c-info">informs</span> is invisible or a note.</p>
+
+  <h3><span class="n">18.1</span><span>Import &amp; decode</span></h3>
+  <div class="tw"><table>
+    <thead><tr><th style="width:30%">Scenario</th><th style="width:28%">Detection</th><th>Behaviour</th></tr></thead>
+    <tbody>
+      <tr><td><span class="chip c-block">blocks</span>DRM-protected file (Spotify cache, purchased M4P)</td><td><code>MediaExtractor</code> reports a crypto scheme, or <code>MediaCodec</code> throws <code>CryptoException</code></td><td>"This file is copy-protected and can't be analysed. Try a file you own outright &mdash; MP3, M4A, FLAC or WAV." Never a raw codec error.</td></tr>
+      <tr><td><span class="chip c-block">blocks</span>Unsupported or exotic codec (APE, WMA lossless, DSD)</td><td>No decoder for the MIME type</td><td>Name the format and list what we do support. Offer a link to convert.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Truncated or corrupt file</td><td>Decoder EOF before the container's declared duration, or a run of decode errors</td><td>Analyse what decoded; mark the map partial with a visible end marker. Better than refusing a mostly-good file.</td></tr>
+      <tr><td><span class="chip c-block">blocks</span>Source URI revoked (file deleted, SD card removed, grant lost)</td><td><code>SecurityException</code> or <code>FileNotFoundException</code> on open</td><td>Keep the beat map. Show the track greyed with "Re-link file" &mdash; the analysis is the valuable artefact, not the audio.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Very long file (DJ set, podcast, &gt; 20 min)</td><td>Duration check at import</td><td>Warn about time and battery; analyse in chunks with a progress bar and a working cancel. Above 60 min, require explicit confirmation.</td></tr>
+      <tr><td><span class="chip c-block">blocks</span>File is silent or near-silent</td><td>Peak amplitude below &minus;50 dBFS across the track</td><td>"There's no audible audio in this file."</td></tr>
+      <tr><td><span class="chip c-info">informs</span>Mono, 8 kHz, or heavily band-limited source</td><td>Format inspection plus spectral rolloff</td><td>Analyse anyway; flag lower expected confidence in the UI.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Variable bit rate with a broken Xing header</td><td>Decoded length disagrees with container duration by &gt; 2%</td><td>Trust the decoder, rewrite the stored duration, log it.</td></tr>
+      <tr><td><span class="chip c-info">informs</span>Same track imported twice under different names</td><td>Content hash match (IMP-04)</td><td>Silently reuse the existing map; surface "already in your library".</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Storage full during analysis</td><td><code>IOException</code> on write, or a pre-flight free-space check</td><td>Pre-flight the requirement (~2 MB/track). If it fails mid-way, roll back cleanly &mdash; never leave a half-written map.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3><span class="n">18.2</span><span>Analysis</span></h3>
+  <div class="tw"><table>
+    <thead><tr><th style="width:30%">Scenario</th><th style="width:28%">Detection</th><th>Behaviour</th></tr></thead>
+    <tbody>
+      <tr><td><span class="chip c-deg">degrades</span>No detectable beat (ambient, spoken word, rubato piano)</td><td>Confidence &lt; 0.5 (&sect;6.3)</td><td>Say it plainly: "We couldn't find a steady beat in this track." Offer tap-tempo and the Swell style, which needs no grid.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Half-time / double-time error</td><td>Top two tempo hypotheses within 15% after octave normalisation</td><td>Ship the prior-favoured answer, but surface the &times;2 / &divide;2 button prominently with "Tempo unclear &mdash; is this right?"</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Tempo changes mid-track (live recording, accelerando)</td><td>Beat-interval variance above threshold in a rolling window</td><td>The DP tracker handles gradual change natively. Flag abrupt changes as section boundaries and lower confidence.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Track has a long silent or free-time intro</td><td>Onset density near zero for &gt; 5 s from the start</td><td>Start the grid at the first sustained onset; mark the intro as a no-cue region.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Odd metre (5/4, 7/8)</td><td>Both 3/4 and 4/4 downbeat hypotheses score poorly</td><td>Emit beats with <span class="mono">meterConfidence: low</span> and no downbeats. Beat-level styles still work; Anchor is disabled with a reason.</td></tr>
+      <tr><td><span class="chip c-block">blocks</span>App killed mid-analysis</td><td>A partial-state marker exists on next launch</td><td>Discard the partial result and offer to restart. Never present a half-analysed map as complete.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Thermal throttling during analysis</td><td>Thermal listener at <span class="mono">SEVERE</span></td><td>Pause, tell the user, resume automatically when it cools. Analysis is not urgent; a hot phone before a show is a real problem.</td></tr>
+      <tr><td><span class="chip c-info">informs</span>Engine version bumped since the map was made</td><td>Version compare on load</td><td>Re-analyse in the background on charge + Wi-Fi-idle. Preserve edits (FMT-01); notify only if beats moved more than 30 ms on average.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Heavily clipped or brickwalled master</td><td>Crest factor below threshold</td><td>Transients are genuinely damaged in the source. Analyse anyway, flag lower expected accuracy in the confidence readout.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3><span class="n">18.3</span><span>Torch &amp; output hardware</span></h3>
+  <div class="tw"><table>
+    <thead><tr><th style="width:30%">Scenario</th><th style="width:28%">Detection</th><th>Behaviour</th></tr></thead>
+    <tbody>
+      <tr><td><span class="chip c-deg">degrades</span>Device has no flash unit</td><td><code>FLASH_INFO_AVAILABLE</code> false on every camera</td><td>Screen-only mode, stated once at setup rather than failing at showtime. Fully usable product.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Torch can't strobe fast enough</td><td>Capability probe (TCH-01) measures max reliable rate</td><td>Auto-select a lower subdivision and record the ceiling in the device profile. Show the user the number.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Another app holds the camera</td><td><code>CameraAccessException CAMERA_IN_USE</code>, or the torch callback reports an external change</td><td>Pause torch output, keep screen and haptics running, show "Flash unavailable &mdash; another app is using the camera." Retry every 2 s.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>User toggles the quick-settings torch mid-show</td><td><code>registerTorchCallback</code> fires with an unexpected state</td><td>Yield rather than fight. Resume when the state returns to ours. Never enter a toggle war with the system UI.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>LED driver cuts out from sustained use</td><td>Duty guard (TCH-05), or a torch callback reporting off when we set on</td><td>Back off to 50% duty for 30 s, then step back up. Log to telemetry as a device-profile signal.</td></tr>
+      <tr><td><span class="chip c-info">informs</span>Multiple cameras with flash (front and rear)</td><td>Enumerate at probe time</td><td>Default to the rear. Offer front as a choice &mdash; front-facing flash is genuinely better when the phone is held screen-out toward the stage.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Screen dims from adaptive brightness or battery saver</td><td>Compare requested vs. actual brightness</td><td>Set window brightness explicitly; if the system overrides it, tell the user battery saver is limiting the show.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Device has no vibrator or a weak one</td><td><code>Vibrator.hasVibrator()</code>, <code>hasAmplitudeControl()</code></td><td>Disable the haptic channel silently. It is never the primary output.</td></tr>
+      <tr><td><span class="chip c-block">blocks</span>Phone is face-down or in a pocket</td><td>Proximity sensor + accelerometer orientation (SAF-06)</td><td>Suppress torch, keep the show clock running so it resumes correctly in time when lifted.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3><span class="n">18.4</span><span>Live listening (Phase 2)</span></h3>
+  <div class="tw"><table>
+    <thead><tr><th style="width:30%">Scenario</th><th style="width:28%">Detection</th><th>Behaviour</th></tr></thead>
+    <tbody>
+      <tr><td><span class="chip c-deg">degrades</span>Never locks on</td><td>No match above confidence after 10 s</td><td>Offer three outs: hold the phone up higher, pick the track manually and start on a tap, or switch to a free-running tempo-only mode. Never just spin.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Loses lock mid-song (crowd roar, mic occluded)</td><td>Confidence below threshold for 3 consecutive windows</td><td>Coast on the drift filter for up to 8 s (LIV-05), then fade output out over 1 s rather than stopping dead. Keep trying to re-lock.</td></tr>
+      <tr><td><span class="chip c-block">blocks</span>Wrong song playing</td><td>Best match is a different track in the library, or nothing matches</td><td>If it's another mapped track, offer to switch shows. If unknown, say "That's not a track you've mapped."</td></tr>
+      <tr><td><span class="chip c-block">blocks</span>Live performance of a mapped song</td><td>Persistent no-match despite strong musical signal</td><td>Detect the pattern and explain it: "This sounds like a live version &mdash; we can only follow the studio recording." Offer tempo-only mode. (&sect;10.2)</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>DJ pitch-shifts or time-stretches the track</td><td>Match offsets drift linearly; the filter's rate term diverges from 1.0</td><td>The Kalman rate term already models this. Track playback rates from 0.92&times; to 1.08&times;; beyond that, declare no match.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Extreme noise, phone in a pocket, mic blocked</td><td>Input level below threshold or spectral flatness near 1.0</td><td>"We can't hear the music &mdash; is the mic covered?" Don't burn battery matching noise.</td></tr>
+      <tr><td><span class="chip c-block">blocks</span>Mic permission denied</td><td>Permission result</td><td>Explain once what it's for, offer the settings deep link, and leave Phase 1 fully working. Never nag on every launch.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Another app grabs the mic (call, voice assistant)</td><td><code>AudioManager</code> focus change, or AAudio error</td><td>Coast, then pause with a clear reason. Resume automatically when the mic frees up.</td></tr>
+      <tr><td><span class="chip c-info">informs</span>Track plays twice in an evening</td><td>Second cold lock on the same track</td><td>Just work. The index is already warm; lock should be faster the second time.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Song ends or is cut early by the DJ</td><td>Match confidence collapses while position is near the end</td><td>Fade output over 500 ms and return to listening. Never keep flashing into silence.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3><span class="n">18.5</span><span>Lifecycle, power &amp; environment</span></h3>
+  <div class="tw"><table>
+    <thead><tr><th style="width:30%">Scenario</th><th style="width:28%">Detection</th><th>Behaviour</th></tr></thead>
+    <tbody>
+      <tr><td><span class="chip c-deg">degrades</span>Incoming call mid-show</td><td>Audio focus loss / telephony state</td><td>Stop all output immediately and hold position. Offer to resume. A strobing phone during a call is indefensible.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>App backgrounded mid-show</td><td>Lifecycle</td><td>Foreground service keeps the show running &mdash; that is the point of it. The notification carries a stop button.</td></tr>
+      <tr><td><span class="chip c-block">blocks</span>Process killed by the OS</td><td>Absent on restart</td><td>Persist show position every 2 s so relaunch can offer "resume from 1:47".</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Battery below 15%</td><td>Battery broadcast</td><td>Offer screen-only. Below 5%, stop and say why. Nobody thanks us for a dead phone at the merch stand.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Battery saver or Doze active</td><td><code>PowerManager.isPowerSaveMode</code></td><td>Warn before arming that timing accuracy may suffer; offer a deep link to exempt the app.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Aggressive OEM battery management (Xiaomi, Oppo, Huawei)</td><td>Known-manufacturer list plus a self-check that the FGS survived a 60 s background test</td><td>One-time guided setup pointing at the OEM's autostart screen. This is the top cause of "it stopped working" reports on these devices and cannot be fixed in code.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Phone very hot before the show even starts</td><td>Thermal status at arm time</td><td>Warn and offer reduced intensity rather than starting a show that will die in ninety seconds.</td></tr>
+      <tr><td><span class="chip c-info">informs</span>Bright daylight (outdoor day event)</td><td>Ambient light sensor</td><td>Note that the effect will be hard to see, and push screen-only at full brightness as the better outdoor choice.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Bluetooth speaker in Phase 1 rehearsal</td><td>Audio route is A2DP</td><td><code>getTimestamp()</code> already accounts for most of it, but warn that BT adds 150&ndash;250 ms and offer the offset nudge. Recommend wired or the phone speaker for calibration.</td></tr>
+      <tr><td><span class="chip c-info">informs</span>Device rotated mid-show</td><td>Config change</td><td>Show surface must not recreate. Handle the config change; the scheduler never restarts.</td></tr>
+      <tr><td><span class="chip c-deg">degrades</span>Foldable opened or closed mid-show</td><td>Config change with a display swap</td><td>Same &mdash; the scheduler owns the clock and outlives the UI. Explicitly tested, because this is exactly the kind of thing that recreates an Activity and resets a timer.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 19 -->
+<section id="s19">
+  <h2><span class="n">19</span><span>Device fragmentation</span></h2>
+  <p class="sub">A device profile, measured once, that every other subsystem reads from.</p>
+
+  <p>Torch behaviour varies more between Android devices than almost anything else in the platform, and none of it is discoverable from the API. The capability probe (TCH-01) writes a profile; the compiler and scheduler consume it. Anonymised profiles reported to telemetry build a lookup table so most users eventually skip the probe entirely.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th style="width:34%">Profile field</th><th style="width:20%">Range seen</th><th>Consumer</th></tr></thead>
+    <tbody>
+      <tr><td><code>torchLatencyMs</code></td><td class="num">5 &ndash; 45</td><td>Compiler &mdash; subtracted from every torch cue time</td></tr>
+      <tr><td><code>torchMaxRateHz</code></td><td class="num">4 &ndash; 25</td><td>Compiler &mdash; caps subdivision below the safety cap where hardware is slower</td></tr>
+      <tr><td><code>torchStrengthLevels</code></td><td class="num">1 &ndash; 12</td><td>Compiler &mdash; graded brightness, or fall back to duration modulation</td></tr>
+      <tr><td><code>hasUnprocessedMic</code></td><td class="num">bool</td><td>Listen &mdash; gates the ultrasonic tier entirely</td></tr>
+      <tr><td><code>audioTimestampSupported</code></td><td class="num">bool</td><td>Playback clock &mdash; picks the fallback path and flags confidence</td></tr>
+      <tr><td><code>outputLatencyMs</code></td><td class="num">40 &ndash; 250</td><td>Rehearsal &mdash; per audio route, re-measured on route change</td></tr>
+      <tr><td><code>analysisSpeedFactor</code></td><td class="num">0.3 &ndash; 4&times;</td><td>UI &mdash; honest time estimates instead of a lying progress bar</td></tr>
+      <tr><td><code>aggressiveOemKill</code></td><td class="num">bool</td><td>Onboarding &mdash; triggers the guided autostart setup</td></tr>
+    </tbody>
+  </table></div>
+
+  <p><b>Test matrix minimum:</b> Pixel (clean AOSP, reference), Samsung mid-range (largest install base), Xiaomi or Redmi (worst-case background management), a sub-$150 device on Android 10 (worst-case CPU and the floor for analysis time), and one foldable. Torch latency must be measured on the rig (&sect;22.3) for every device in the matrix, not estimated.</p>
+</section>
+
+<!-- 20 -->
+<section id="s20">
+  <h2><span class="n">20</span><span>Non-functional requirements</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th style="width:22%">Area</th><th>Requirement</th></tr></thead>
+    <tbody>
+      <tr><td><b>Min SDK</b></td><td>API 29 (Android 10). Covers &gt; 92% of devices; below that, torch and audio-timestamp behaviour is too inconsistent to support honestly.</td></tr>
+      <tr><td><b>Target SDK</b></td><td>Latest stable, kept current within one release. Foreground-service and permission rules change every year and we are exposed to all of them.</td></tr>
+      <tr><td><b>APK size</b></td><td>&lt; 15 MB download. No bundled ML models is most of how we get there.</td></tr>
+      <tr><td><b>Cold start</b></td><td>&lt; 1.2 s to an interactive library screen on the reference device.</td></tr>
+      <tr><td><b>Show arm time</b></td><td>&lt; 300 ms from tap to armed, given a compiled show. Compilation is never on this path.</td></tr>
+      <tr><td><b>Memory</b></td><td>&lt; 220 MB peak during analysis. Stream the decode; never hold a whole decoded track in RAM.</td></tr>
+      <tr><td><b>Offline</b></td><td>100% of P1 and P2 functionality works in airplane mode. Verified by an automated test suite that runs with networking disabled.</td></tr>
+      <tr><td><b>Accessibility</b></td><td>TalkBack labels on every control; the waveform exposes a text summary (tempo, beat count, confidence). Reduced-flash mode is a first-class path, not a fallback. All targets &ge; 48 dp.</td></tr>
+      <tr><td><b>Localisation</b></td><td>English at launch; all strings externalised, no concatenation, RTL-safe layouts from day one.</td></tr>
+      <tr><td><b>Crash-free</b></td><td>&ge; 99.5% sessions. A crash during a show is a total product failure, so show-screen crashes are tracked as a separate, stricter metric.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 21 -->
+<section id="s21">
+  <h2><span class="n">21</span><span>Telemetry</span></h2>
+  <p class="sub">Enough to fix device-specific problems we cannot reproduce; never enough to identify a person or a song.</p>
+  <p>Opt-in, off by default, and with no <code>INTERNET</code> permission in P1/P2 there is nowhere for data to go anyway &mdash; local diagnostics only, exportable by the user when they file a report. When P3 adds networking, the following are worth collecting:</p>
+  <div class="tw"><table>
+    <thead><tr><th style="width:30%">Event</th><th style="width:34%">Fields</th><th>Answers</th></tr></thead>
+    <tbody>
+      <tr><td><code>analysis_complete</code></td><td>duration, confidence, tempo, engine version, device class, wall time</td><td>Which genres and devices produce bad maps</td></tr>
+      <tr><td><code>device_profile</code></td><td>the whole profile from &sect;19, hashed device model</td><td>Builds the shared lookup table that removes the probe</td></tr>
+      <tr><td><code>show_run</code></td><td>style, duration, cues fired, cues dropped late, peak flash Hz, thermal events, battery delta</td><td>Whether shows actually run clean in the field</td></tr>
+      <tr><td><code>limiter_action</code></td><td>original rate, final rate, cues dropped, subdivision escalated</td><td>How often safety changes the artistic result &mdash; if it's often, the styles are wrong</td></tr>
+      <tr><td><code>lock_attempt</code></td><td>time to lock, confidence at lock, coasting duration, loss count</td><td>Whether Phase 2 works in real rooms rather than in the office</td></tr>
+      <tr><td><code>torch_anomaly</code></td><td>error code, device, context</td><td>The OEM quirk list</td></tr>
+    </tbody>
+  </table></div>
+  <p>Never collected: track titles, artists, file names, file hashes that could be reversed to a track, audio, or fingerprints. The song a user listens to is not our business.</p>
+</section>
+
+<!-- 22 -->
+<section id="s22">
+  <h2><span class="n">22</span><span>Test strategy</span></h2>
+
+  <h3><span class="n">22.1</span><span>Analysis correctness</span></h3>
+  <p>The DSP core is pure C++ with no Android dependency, so it is tested on the host in CI against a fixture corpus of 60 tracks with hand-annotated beats spanning rock, electronic, hip-hop, jazz, classical, Bollywood, Afrobeats and metal. Metrics are standard MIR: F-measure at &plusmn;70 ms, plus continuity-based scores. <b>Any commit that moves F&#8321; more than 0.02 in either direction fails the build and requires a human to look at it</b> &mdash; including improvements, because a jump usually means a fixture broke.</p>
+
+  <h3><span class="n">22.2</span><span>Safety limiter</span></h3>
+  <p>Property-based tests: for any generated cue list, at any tempo from 40 to 300 BPM, with any style and any edit set, the limiter's output must never exceed 3.0 Hz in any 1 s window. Thousands of generated cases per run. This is the one test suite that gates release unconditionally.</p>
+
+  <h3><span class="n">22.3</span><span>Timing &mdash; the photodiode rig</span></h3>
+  <p>You cannot measure light output from inside the phone, and self-reported timing is exactly the thing that will be wrong. Build the rig:</p>
+  <ul>
+    <li>A photodiode taped over the torch LED, into an oscilloscope or a cheap USB DAQ.</li>
+    <li>The phone's line-out (or a microphone on its speaker) into the second channel.</li>
+    <li>Play a test track with known beat positions; capture both channels; measure the distribution of light-onset minus audio-beat.</li>
+    <li>Report mean offset (which becomes <code>torchLatencyMs</code>) and standard deviation (which is the jitter figure in &sect;14).</li>
+  </ul>
+  <p>Run this for every device in the matrix, every release. A 240 fps phone camera pointed at both devices is an acceptable low-budget substitute at ~4 ms resolution, which is enough to catch anything that matters.</p>
+
+  <h3><span class="n">22.4</span><span>Field testing</span></h3>
+  <div class="tw"><table>
+    <thead><tr><th style="width:26%">Stage</th><th style="width:20%">Scale</th><th>What it proves</th></tr></thead>
+    <tbody>
+      <tr><td>Desk</td><td class="num">1 phone</td><td>Sync against local playback. Photodiode rig. Phase 1 exit criterion.</td></tr>
+      <tr><td>Room</td><td class="num">10 phones</td><td>Do ten independent phones flash together? Film at 120 fps and measure the spread frame by frame.</td></tr>
+      <tr><td>Bar or club</td><td class="num">30 phones</td><td>Real noise, real reverb, real crowd occlusion of microphones. First honest test of Phase 2.</td></tr>
+      <tr><td>Venue</td><td class="num">200+ phones</td><td>Propagation spread, thermal behaviour across device types, and whether the install funnel is survivable at all.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<hr>
+
+<!-- 23 -->
+<section id="s23">
+  <h2><span class="n">23</span><span>Risks</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th style="width:28%">Risk</th><th style="width:12%">Severity</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td><b>The install funnel kills the arena use case</b></td><td><span class="chip c-block">critical</span></td><td>The hardest problem in the product and not a technical one. CUE solved it by moving to the web. Options: a PWA client using the browser torch API for the fan tier while the native app serves designers; an Instant App; or accepting that our market is season-ticket holders and superfans who install ahead of time. <b>Decide before building Phase 3.</b> See &sect;25.</td></tr>
+      <tr><td><b>Fingerprinting fails on live performance</b></td><td><span class="chip c-block">critical</span></td><td>Structural (&sect;10.2). Be explicit in positioning; make the ultrasonic tier the answer for touring artists; never let a tour manager find out in soundcheck.</td></tr>
+      <tr><td><b>A photosensitive incident</b></td><td><span class="chip c-block">critical</span></td><td>All of &sect;15. Two independent limiter gates, property-based tests, published peak-rate figures, mandatory consent, an always-available stop.</td></tr>
+      <tr><td><b>Torch behaviour varies too much to feel tight</b></td><td><span class="chip c-deg">high</span></td><td>Per-device profiling (&sect;19), the photodiode rig, and a shared profile table. Screen output as the universal fallback that no device can get wrong.</td></tr>
+      <tr><td><b>Analysis too slow on cheap phones</b></td><td><span class="chip c-deg">high</span></td><td>C++ core, 22 kHz analysis rate, streaming progress. If a device is genuinely too slow, say the honest number up front rather than showing a stalled bar.</td></tr>
+      <tr><td><b>CUE or a major have already locked the venues</b></td><td><span class="chip c-deg">high</span></td><td>The fingerprint tier needs no venue at all &mdash; that is the whole point of leading with it. Enter venues later, from a position of an existing user base.</td></tr>
+      <tr><td><b>OEM background-kill breaks shows</b></td><td><span class="chip c-deg">medium</span></td><td>Guided setup on known-bad manufacturers, a self-test that verifies the service survives, and a clear in-app explanation when it doesn't.</td></tr>
+      <tr><td><b>Rights holders object to beat-map distribution</b></td><td><span class="chip c-info">medium</span></td><td>Never distribute maps for commercial tracks without review. User-generated maps stay on the user's device.</td></tr>
+      <tr><td><b>Battery and heat complaints</b></td><td><span class="chip c-info">medium</span></td><td>Published budget, thermal degradation ladder, duty-cycle guard, and a visible battery estimate before the show arms.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3><span class="n">23.1</span><span>On the install problem specifically</span></h3>
+  <p>It is worth being blunt about this because it is the risk most likely to make a technically excellent product commercially irrelevant. CUE started with a native app and moved to a QR-code web page, and that was almost certainly the most valuable decision they made. The browser can drive the torch (<code>ImageCapture</code> with the <code>torch</code> constraint) and the screen, and it can decode audio from <code>getUserMedia</code> &mdash; so a web client is technically feasible for the fan tier, with meaningfully worse timing and no background execution.</p>
+  <p>The resolution is probably that these are two products sharing a beat-map format: <b>a native app for the people who design and rehearse shows</b>, and <b>a web client for the fifty thousand people who just scanned a code</b>. That is a Phase 3 decision, but the format work in &sect;7 should be done with it in mind &mdash; which is why FMT-03 requires portability now rather than later.</p>
+</section>
+
+<!-- 24 -->
+<section id="s24">
+  <h2><span class="n">24</span><span>Roadmap</span></h2>
+  <div class="tw"><table>
+    <thead><tr><th style="width:11%">Milestone</th><th style="width:12%">Est.</th><th style="width:36%">Deliverable</th><th>Exit criterion</th></tr></thead>
+    <tbody>
+      <tr><td><b>M0</b><br><span style="font-size:12px;color:var(--ink-3)">Spike</span></td><td class="num">1 wk</td><td>Decode a file, flash the torch on a hardcoded timer, measure real latency on three devices</td><td>We know the actual torch latency and jitter numbers, not the ones in this document</td></tr>
+      <tr><td><b>M1</b><br><span style="font-size:12px;color:var(--ink-3)">Analysis</span></td><td class="num">3 wks</td><td>C++ DSP core: decode, HPSS, onset, tempo, beats. Host test harness and the 60-track fixture corpus</td><td>F&#8321; &ge; 0.90 on the corpus, &lt; 8 s per track on the reference device</td></tr>
+      <tr><td><b>M2</b><br><span style="font-size:12px;color:var(--ink-3)">Visualise</span></td><td class="num">2 wks</td><td>Import flow, waveform + beat lane + cue lane, playback transport</td><td>A user can import a song and see a correct, scrubbable beat map at 60 fps</td></tr>
+      <tr><td><b>M3</b><br><span style="font-size:12px;color:var(--ink-3)">Light</span></td><td class="num">2 wks</td><td>Scheduler, torch and screen drivers, device profiling, safety limiter, show compiler</td><td>&plusmn;20 ms p95 on the rig; limiter passes property tests; <b>Phase 1 ships</b></td></tr>
+      <tr><td><b>M4</b><br><span style="font-size:12px;color:var(--ink-3)">Polish</span></td><td class="num">2 wks</td><td>Editor, styles, sections, accessibility, onboarding, the full edge-case list from &sect;18</td><td>Ten external show designers use it on their own tracks without help</td></tr>
+      <tr><td><b>M5</b><br><span style="font-size:12px;color:var(--ink-3)">Listen</span></td><td class="num">4 wks</td><td>Fingerprint index, rolling matcher, drift filter, listen UI, propagation handling</td><td>Cold lock &le; 3 s and stable through a full track in a real bar</td></tr>
+      <tr><td><b>M6</b><br><span style="font-size:12px;color:var(--ink-3)">Crowd</span></td><td class="num">3 wks</td><td>Multi-device field testing, thermal and battery hardening, telemetry</td><td>30 phones in a club stay visually together for a full song. <b>Phase 2 ships</b></td></tr>
+      <tr><td><b>M7</b><br><span style="font-size:12px;color:var(--ink-3)">Venue</span></td><td class="num">8 wks+</td><td>Ultrasonic encoder and decoder, operator console, show packaging, UDP/OSC trigger</td><td>One paid venue install running a real event</td></tr>
+    </tbody>
+  </table></div>
+  <p style="color:var(--ink-2);font-size:15px">Estimates assume one full-time Android engineer with DSP experience. M1 is the one to protect: if beat detection isn't genuinely good, nothing downstream matters, and it is also the milestone most likely to be underestimated.</p>
+</section>
+
+<!-- 25 -->
+<section id="s25">
+  <h2><span class="n">25</span><span>Open questions</span></h2>
+  <p class="sub">Answered decisions are recorded first; the ones still open are what this document needs from you next.</p>
+
+  <h4>Settled in this draft</h4>
+  <div class="tw"><table>
+    <thead><tr><th style="width:34%">Question</th><th>Decision</th></tr></thead>
+    <tbody>
+      <tr><td>Phase 2 sync mechanism</td><td>Fingerprint alignment as the consumer path, ultrasonic as a later pro tier. Both feed the same scheduler and consume the same beat map.</td></tr>
+      <tr><td>Vocal handling</td><td>HPSS rather than neural stem separation. No model file, seconds not minutes, and the accuracy difference does not justify 80 MB.</td></tr>
+      <tr><td>Output channels</td><td>Torch, screen, haptics and an on-screen visualiser, all driven from one compiled cue list.</td></tr>
+      <tr><td>Platform</td><td>Native Android, Kotlin + Compose, with a C++ DSP core kept portable for an eventual iOS port.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>Still open</h4>
+  <ol>
+    <li><b>Who is the first paying customer &mdash; an artist or a team?</b> It changes almost nothing in Phase 1 and almost everything in Phase 3. A touring artist needs portable show packages and works with live performance, which pushes ultrasonic up the roadmap. A sports team has one fixed venue, a fixed PA and a game-ops budget, which makes a venue install far easier to sell.</li>
+    <li><b>Do we commit to a web fan client?</b> (&sect;23.1) If yes, the beat-map format and the show compiler should be designed to run in a browser from the start, and that is a real constraint on M1&ndash;M3 rather than a later port.</li>
+    <li><b>Should Phase 1 ship publicly, or stay internal?</b> A standalone "make your phone flash to your music" app is a genuinely fun consumer product that would generate device profiles and beat-map corpus data for free. It also shows the whole idea to competitors a year early.</li>
+    <li><b>How much of a show does the designer author versus the algorithm?</b> This document assumes auto-generate-then-nudge. A full timeline editor is a much bigger product and a different company.</li>
+    <li><b>Does the torch-only path really avoid the <code>camera</code> foreground-service type?</b> (&sect;16) Worth verifying on Samsung and Xiaomi specifically in M0, because if it does not, the permission story in &sect;17 gets meaningfully worse and onboarding needs rework.</li>
+  </ol>
+</section>
+
+</main>
+
+<footer>
+  TuneSync PRD v0.1 &middot; drafted 21 August 2026 &middot; competitive detail sourced from
+  <a href="https://www.connectwithcue.com/">connectwithcue.com</a>,
+  <a href="https://github.com/jamesonrader/CUE-Ultrasonic-Transmissions-Protocol">CUE's published SDK notes</a>,
+  <a href="https://source.android.com/docs/core/camera/torch-strength-control">AOSP torch strength control</a>
+  and <a href="https://www.w3.org/TR/UNDERSTANDING-WCAG20/seizure-does-not-violate.html">WCAG 2.3.1</a>.
+</footer>
+
+</div>
+
+<script>
+(function(){
+  // --- hero waveform ---
+  var cv = document.getElementById('wave');
+  if (cv) {
+    var ctx = cv.getContext('2d');
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var bars = [], N = 0, t0 = null, DUR = 1400;
+
+    function build(){
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var w = cv.clientWidth, h = cv.clientHeight;
+      cv.width = Math.floor(w * dpr); cv.height = Math.floor(h * dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      var gap = 9;
+      N = Math.max(24, Math.floor(w / gap));
+      bars = [];
+      for (var i=0;i<N;i++){
+        var x = i / (N-1);
+        // envelope: quiet at edges, dense middle — reads like a track
+        var env = 0.34 + 0.66 * Math.pow(Math.sin(Math.PI * x), 0.62);
+        var v = env * (
+            0.50
+          + 0.26 * Math.sin(x * 41.3 + 0.7)
+          + 0.16 * Math.sin(x * 97.1 + 2.1)
+          + 0.12 * Math.sin(x * 197.7 + 4.3)
+        );
+        v = Math.max(0.06, Math.min(1, v));
+        bars.push({x:x, v:v, beat:false});
+      }
+      // mark beats: local maxima on a roughly regular grid = the "highest nodes"
+      var step = Math.max(6, Math.round(N/26));
+      for (var b=Math.round(step*0.6); b<N; b+=step){
+        var best=b, bv=-1;
+        for (var k=Math.max(0,b-2); k<=Math.min(N-1,b+2); k++){
+          if (bars[k].v > bv){ bv=bars[k].v; best=k; }
+        }
+        if (bars[best].v > 0.52) bars[best].beat = true;
+      }
+    }
+
+    function draw(p){
+      var w = cv.clientWidth, h = cv.clientHeight, mid = h/2;
+      ctx.clearRect(0,0,w,h);
+      var bw = 2.6;
+      for (var i=0;i<N;i++){
+        var b = bars[i];
+        var reveal = Math.min(1, Math.max(0, (p * 1.25) - b.x * 0.25));
+        if (reveal <= 0) continue;
+        var hh = b.v * (h*0.44) * reveal;
+        var px = b.x * (w - bw - 2) + 1;
+        ctx.fillStyle = b.beat ? 'rgba(255,166,31,0.95)' : 'rgba(255,255,255,0.80)';
+        ctx.fillRect(px, mid - hh, bw, hh*2);
+        if (b.beat){
+          // marker settles onto the peak once the bar is fully drawn
+          var s = Math.min(1, Math.max(0, (reveal - 0.7) / 0.3));
+          if (s > 0){
+            ctx.globalAlpha = s;
+            ctx.fillStyle = '#FFA61F';
+            ctx.beginPath();
+            ctx.arc(px + bw/2, mid - hh - 9 + (1-s)*7, 2.6, 0, Math.PI*2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+          }
+        }
+      }
+    }
+
+    function frame(ts){
+      if (t0 === null) t0 = ts;
+      var p = Math.min(1, (ts - t0) / DUR);
+      draw(p * p * (3 - 2*p));
+      if (p < 1) requestAnimationFrame(frame);
+    }
+
+    build();
+    if (reduce) { draw(1); } else { requestAnimationFrame(frame); }
+    var rt;
+    window.addEventListener('resize', function(){
+      clearTimeout(rt);
+      rt = setTimeout(function(){ build(); draw(1); }, 150);
+    });
+  }
+
+  // --- rail active state ---
+  var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+  if (links.length && 'IntersectionObserver' in window){
+    var map = {};
+    links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting){
+          links.forEach(function(a){ a.classList.remove('on'); });
+          var a = map[e.target.id];
+          if (a) a.classList.add('on');
+        }
+      });
+    }, { rootMargin: '-10% 0px -75% 0px', threshold: 0 });
+    document.querySelectorAll('section[id]').forEach(function(s){ io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>
