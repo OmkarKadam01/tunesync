@@ -6,6 +6,14 @@ TuneSync analyses a song on your Android device, extracts a beat map with the vo
 
 **Status:** Phase 1 (offline workbench) is built and running. Phases 2 and 3 are specified but not started. See [Roadmap](#roadmap).
 
+<p align="center">
+  <img src="docs/screenshots/beat-map.png"
+       alt="The beat map screen: tempo 160 bpm, 32 beats mapped, 80% confidence, peak 1.0 flash per second. Below the stats are three synchronised lanes — waveform, beat grid with taller ticks on downbeats, and the amber cue timeline — then style chips and independent toggles for camera flash, screen and no-strobing."
+       width="330">
+</p>
+
+<p align="center"><em>The beat map screen. Three lanes over one timebase: the audio, the beats found in it, and the cues that will actually fire — so the mapping is visible rather than asserted. The peak flash rate is shown because designers should see the safety number, not trust a promise.</em></p>
+
 ---
 
 ## What it does today

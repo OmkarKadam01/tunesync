@@ -50,7 +50,10 @@ fun BeatMapView(
             for (c in 0 until cols) {
                 val x = c * w / cols
                 val hi = peaks.max[c].coerceIn(0f, 1f) * mid
-                val lo = -peaks.min[c].coerceIn(0f, 1f) * mid
+                // Negate before clamping. `-x.coerceIn(0f, 1f)` binds as
+                // `-(x.coerceIn(...))`, and min is negative, so it clamps to zero
+                // and the lower half of the waveform never draws.
+                val lo = (-peaks.min[c]).coerceIn(0f, 1f) * mid
                 drawRect(
                     color = WaveColor,
                     topLeft = Offset(x, mid - hi),
