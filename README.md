@@ -103,7 +103,7 @@ Phase 2 works for walk-out music, DJ sets and arena playlists. It will **not** f
 
 ## Documentation
 
-- **[Product requirements](docs/prd.html)** — the full PRD: competitive analysis, phase scope, the latency budget, ~55 edge cases by subsystem, device fragmentation, risks. Open it in a browser.
+- **[Product requirements](https://omkarkadam01.github.io/tunesync/prd.html)** — the full PRD: competitive analysis, phase scope, the latency budget, ~55 edge cases by subsystem, device fragmentation, risks. ([source](docs/prd.html))
 - **[Engineering notes](docs/ENGINEERING-NOTES.md)** — the measured calibration constants, and the bugs worth remembering.
 
 ## Non-goals
